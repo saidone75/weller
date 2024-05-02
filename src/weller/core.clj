@@ -15,7 +15,7 @@
   (loop [message nil]
     (t/log! :debug @status)
     (when-not (nil? message)
-      (>!! channel message)
+      (>!! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
       ;(t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message))))
       )
     (when (:running @status)
