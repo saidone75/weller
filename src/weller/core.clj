@@ -14,8 +14,7 @@
       (println (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
     (when (:running @status)
       (let [message (try (.receive consumer)
-                         (catch Exception e nil)
-                         (finally nil))]
+                         (catch Exception e (println (.getMessage e))))]
         (recur message))))
   (println "stopping read-message"))
 
@@ -49,11 +48,6 @@
   (component/using
     (map->ActiveMqListener {})
     []))
-
-(defn get-message [listener]
-  (let [message (.receive (:consumer listener))]
-    (println message)
-    (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
 
 (defrecord Application [config activemq-listener]
   component/Lifecycle
