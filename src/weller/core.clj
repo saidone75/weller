@@ -1,29 +1,30 @@
 (ns weller.core
   (:require [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
-            [cral.utils.utils :as cu])
+            [cral.utils.utils :as cu]
+            [taoensso.telemere :as t])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
 
 (defn read-message [consumer status]
-  (println "starting read-message")
+  (t/log! :debug "starting read-message")
   (loop [message nil]
-    (println @status)
+    (t/log! :debug @status)
     (when-not (nil? message)
-      (println (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
+      (t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
     (when (:running @status)
       (let [message (try (.receive consumer)
                          (catch Exception e (println (.getMessage e))))]
         (recur message))))
-  (println "stopping read-message"))
+  (t/log! :debug "stopping read-message"))
 
 (defrecord ActiveMqListener
   [config status connection consumer]
   component/Lifecycle
 
   (start [this]
-    (println "starting ActiveMqListener")
+    (t/log! :info "starting ActiveMqListener")
     (if connection
       this
       (let [connection-factory (new ActiveMQConnectionFactory)
@@ -39,7 +40,7 @@
         (assoc this :status status :connection connection :consumer consumer))))
 
   (stop [this]
-    (println "stopping ActiveMqListener")
+    (t/log! :info "stopping ActiveMqListener")
     (swap! status assoc :running false)
     (.close connection)
     (assoc this :connection nil :consumer nil)))
@@ -53,11 +54,11 @@
   component/Lifecycle
 
   (start [this]
-    (println "Starting Application")
+    (t/log! :info "starting Application")
     this)
 
   (stop [this]
-    (println "Stopping Application")
+    (t/log! :info "stopping Application")
     this))
 
 (defn make-application [config]
