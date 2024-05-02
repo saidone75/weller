@@ -5,7 +5,7 @@
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [clojure.core.async :as a
-             :refer [>! <! >!! <!! go chan buffer close! thread alts! alts!! timeout]])
+             :refer [>! <! >!! <!! go go-loop chan buffer close! thread alts! alts!! timeout]])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
@@ -41,7 +41,10 @@
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (.start (Thread. #(read-message consumer channel status)))
+        (go-loop [message (.receive consumer)]
+          (>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+          (when (:running @status) (recur (.receive consumer))))
+        ;(.start (Thread. #(read-message consumer channel status)))
         (assoc this :status status :connection connection))))
 
   (stop [this]
