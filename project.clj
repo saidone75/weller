@@ -8,7 +8,8 @@
                  [org.apache.activemq/activemq-broker "6.1.1"]
                  [org.clojure/data.json "2.5.0"]
                  [org.saidone/cral "0.3.0"]
-                 [com.taoensso/telemere "1.0.0-beta5"]]
+                 [com.taoensso/telemere "1.0.0-beta5"]
+                 [russellwhitaker/immuconf "0.3.0"]]
   :main ^:skip-aot weller.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

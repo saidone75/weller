@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
+            [immuconf.config :as immu]
             [taoensso.telemere :as t])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
@@ -28,10 +29,10 @@
     (if connection
       this
       (let [connection-factory (new ActiveMQConnectionFactory)
-            _ (. connection-factory (setBrokerURL "tcp://localhost:61616"))
+            _ (. connection-factory (setBrokerURL (format "%s://%s:%d" (:scheme config) (:host config) (:port config))))
             connection (.createConnection connection-factory)
             session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
-            topic (.createTopic session "alfresco.repo.event2")
+            topic (.createTopic session (:topic config))
             consumer (.createConsumer session topic)
             status (atom {})]
         (swap! status assoc :running true)
@@ -45,9 +46,9 @@
     (.close connection)
     (assoc this :connection nil :consumer nil)))
 
-(defn make-activemq-listener []
+(defn make-activemq-listener [config]
   (component/using
-    (map->ActiveMqListener {})
+    (map->ActiveMqListener {:config config})
     []))
 
 (defrecord Application [config activemq-listener]
@@ -66,14 +67,27 @@
 
 (defn application [config]
   (component/system-map
-    :activemq-listener (make-activemq-listener)
+    :activemq-listener (make-activemq-listener (:activemq config))
     :app (component/using
            (make-application config)
            [:activemq-listener])))
 
+(defn- exit
+  [status msg]
+  (if-not (nil? msg) (t/log! :info msg))
+  (System/exit status))
+
 (defn -main
   [& args]
-  (let [component (component/start (application {}))]
+
+  ;; load configuration
+  (def config (atom {}))
+  (try
+    (reset! config (immu/load "resources/config.edn"))
+    (catch Exception e (exit 1 (.getMessage e))))
+  (t/log! :debug @config)
+
+  (let [component (component/start (application @config))]
     (Thread/sleep 30000)
     (component/stop component)
     (Thread/sleep 1000)))
