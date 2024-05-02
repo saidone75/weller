@@ -3,17 +3,21 @@
             [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
             [immuconf.config :as immu]
-            [taoensso.telemere :as t])
+            [taoensso.telemere :as t]
+            [clojure.core.async :as a
+             :refer [>! <! >!! <!! go chan buffer close! thread alts! alts!! timeout]])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
 
-(defn read-message [consumer status]
+(defn read-message [consumer channel status]
   (t/log! :debug "starting read-message")
   (loop [message nil]
     (t/log! :debug @status)
     (when-not (nil? message)
-      (t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
+      (>!! channel message)
+      ;(t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+      )
     (when (:running @status)
       (let [message (try (.receive consumer)
                          (catch Exception e (println (.getMessage e))))]
@@ -21,7 +25,7 @@
   (t/log! :debug "stopping read-message"))
 
 (defrecord ActiveMqListener
-  [config status connection consumer]
+  [config connection channel status]
   component/Lifecycle
 
   (start [this]
@@ -37,21 +41,38 @@
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (.start (Thread. #(read-message consumer status)))
-        (assoc this :status status :connection connection :consumer consumer))))
+        (.start (Thread. #(read-message consumer channel status)))
+        (assoc this :status status :connection connection))))
 
   (stop [this]
     (t/log! :info "stopping ActiveMqListener")
     (swap! status assoc :running false)
     (.close connection)
-    (assoc this :connection nil :consumer nil)))
+    (assoc this :connection nil)))
 
-(defn make-activemq-listener [config]
+(defn make-activemq-listener [config channel]
   (component/using
-    (map->ActiveMqListener {:config config})
+    (map->ActiveMqListener {:config config :channel channel})
     []))
 
-(defrecord Application [config activemq-listener]
+(defrecord MessageHandler
+  [config channel]
+  component/Lifecycle
+
+  (start [this]
+    (t/log! :info "starting MessageHandler")
+    (t/log! (<!! channel))
+    this)
+
+  (stop [this]
+    (t/log! :info "stopping MessageHandler")
+    this))
+
+(defn make-message-handler [config channel]
+  (map->MessageHandler {:config config :channel channel}))
+
+(defrecord Application
+  [config activemq-listener message-handler]
   component/Lifecycle
 
   (start [this]
@@ -66,11 +87,13 @@
   (map->Application config))
 
 (defn application [config]
-  (component/system-map
-    :activemq-listener (make-activemq-listener (:activemq config))
-    :app (component/using
-           (make-application config)
-           [:activemq-listener])))
+  (let [channel (chan)]
+    (component/system-map
+      :activemq-listener (make-activemq-listener (:activemq config) channel)
+      :message-handler (make-message-handler (:alfresco config) channel)
+      :app (component/using
+             (make-application config)
+             [:activemq-listener :message-handler]))))
 
 (defn- exit
   [status msg]
