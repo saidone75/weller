@@ -4,7 +4,8 @@
             [cral.utils.utils :as cu]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
-            [clojure.core.async :as a])
+            [clojure.core.async :as a]
+            [clojure.core.reducers :as r])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
@@ -26,8 +27,8 @@
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (go-loop [message (.receive consumer)]
-          (>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+        (a/go-loop [message (.receive consumer)]
+          (a/>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
           (when (:running @status) (recur (.receive consumer))))
         (assoc this :status status :connection connection))))
 
@@ -48,7 +49,9 @@
 
   (start [this]
     (t/log! :info "starting MessageHandler")
-    (t/log! (a/<!! channel))
+    (a/go-loop [message (a/<!! channel)]
+      (t/log! message)
+      (recur (a/<! channel)))
     this)
 
   (stop [this]
@@ -76,8 +79,8 @@
 (defn application [config]
   (let [chan (a/chan)
         mult (a/mult chan)
-        handler1 (a/chan)
-        handler2 (a/chan)]
+        handler1 (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Updated")))
+        handler2 (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Created")))]
     (component/system-map
       :activemq-listener (make-activemq-listener (:activemq config) chan)
       :message-handler (make-message-handler (:alfresco config) (a/tap mult handler1))
