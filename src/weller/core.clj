@@ -4,8 +4,7 @@
             [cral.utils.utils :as cu]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
-            [clojure.core.async :as a
-             :refer [>! <! >!! <!! go chan buffer close! thread alts! alts!! timeout]])
+            [clojure.core.async :as a])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
@@ -15,7 +14,7 @@
   (loop [message nil]
     (t/log! :debug @status)
     (when-not (nil? message)
-      (>!! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+      (a/>!! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
       ;(t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message))))
       )
     (when (:running @status)
@@ -61,7 +60,7 @@
 
   (start [this]
     (t/log! :info "starting MessageHandler")
-    (t/log! (<!! channel))
+    (t/log! (a/<!! channel))
     this)
 
   (stop [this]
@@ -72,7 +71,7 @@
   (map->MessageHandler {:config config :channel channel}))
 
 (defrecord Application
-  [config activemq-listener message-handler]
+  [config activemq-listener message-handler message-handler2]
   component/Lifecycle
 
   (start [this]
@@ -87,13 +86,17 @@
   (map->Application config))
 
 (defn application [config]
-  (let [channel (chan)]
+  (let [chan (a/chan)
+        mult (a/mult chan)
+        handler1 (a/chan)
+        handler2 (a/chan)]
     (component/system-map
-      :activemq-listener (make-activemq-listener (:activemq config) channel)
-      :message-handler (make-message-handler (:alfresco config) channel)
+      :activemq-listener (make-activemq-listener (:activemq config) chan)
+      :message-handler (make-message-handler (:alfresco config) (a/tap mult handler1))
+      :message-handler2 (make-message-handler (:alfresco config) (a/tap mult handler2))
       :app (component/using
              (make-application config)
-             [:activemq-listener :message-handler]))))
+             [:activemq-listener :message-handler :message-handler2]))))
 
 (defn- exit
   [status msg]
