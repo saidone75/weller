@@ -1,11 +1,10 @@
 (ns weller.core
-  (:require [clojure.data.json :as json]
+  (:require [clojure.core.async :as a]
+            [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
             [immuconf.config :as immu]
-            [taoensso.telemere :as t]
-            [clojure.core.async :as a]
-            [clojure.core.reducers :as r])
+            [taoensso.telemere :as t])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
@@ -27,8 +26,9 @@
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (a/go-loop [message (.receive consumer)]
-          (a/>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+        (a/go-loop [message (if (:running @status) (.receive consumer) nil)]
+          (when-not (nil? message)
+            (a/>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
           (when (:running @status) (recur (.receive consumer))))
         (assoc this :status status :connection connection))))
 
@@ -44,18 +44,21 @@
     []))
 
 (defrecord MessageHandler
-  [config channel]
+  [config channel status]
   component/Lifecycle
 
   (start [this]
     (t/log! :info "starting MessageHandler")
-    (a/go-loop [message (a/<!! channel)]
-      (t/log! message)
-      (recur (a/<! channel)))
-    this)
+    (let [status (atom {})]
+      (swap! status assoc :running true)
+      (a/go-loop [message (a/<!! channel)]
+        (t/log! message)
+        (when (:running @status) (recur (a/<! channel))))
+      (assoc this :status status)))
 
   (stop [this]
     (t/log! :info "stopping MessageHandler")
+    (swap! status assoc :running false)
     this))
 
 (defn make-message-handler [config channel]
