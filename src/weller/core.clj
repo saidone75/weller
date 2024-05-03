@@ -81,16 +81,17 @@
 
 (defn application [config]
   (let [chan (a/chan)
-        mult (a/mult chan)
-        handler1 (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Updated")))
-        handler2 (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Created")))]
+        mult (a/mult chan)]
     (component/system-map
       :activemq-listener (make-activemq-listener (:activemq config) chan)
-      :message-handler (make-message-handler (:alfresco config) (a/tap mult handler1))
-      :message-handler2 (make-message-handler (:alfresco config) (a/tap mult handler2))
+      :message-handler (make-message-handler (:alfresco config) (a/tap mult (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Updated")))))
+      :message-handler2 (make-message-handler (:alfresco config) (a/tap mult (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Created")))))
       :app (component/using
              (make-application config)
              [:activemq-listener :message-handler :message-handler2]))))
+
+{:event "org.alfresco.event.node.Updated"
+ :filter (weller.filters/or (aspect-added "cm:titled") (aspect-added "cm:versionable"))}
 
 (defn- exit
   [status msg]
