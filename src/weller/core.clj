@@ -9,20 +9,6 @@
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
 
-(defn read-message [consumer channel status]
-  (t/log! :debug "starting read-message")
-  (loop [message nil]
-    (t/log! :debug @status)
-    (when-not (nil? message)
-      (a/>!! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
-      ;(t/log! :debug (cu/kebab-keywordize-keys (json/read-str (.getText message))))
-      )
-    (when (:running @status)
-      (let [message (try (.receive consumer)
-                         (catch Exception e (println (.getMessage e))))]
-        (recur message))))
-  (t/log! :debug "stopping read-message"))
-
 (defrecord ActiveMqListener
   [config connection channel status]
   component/Lifecycle
@@ -40,7 +26,9 @@
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (.start (Thread. #(read-message consumer channel status)))
+        (go-loop [message (.receive consumer)]
+          (>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message))))
+          (when (:running @status) (recur (.receive consumer))))
         (assoc this :status status :connection connection))))
 
   (stop [this]
