@@ -88,6 +88,11 @@
   []
   (partial #(= (get-in % [:data :resource :is-file]) true)))
 
+(defn aspect-added
+  [aspect]
+  (partial #(and (.contains (get-in % [:data :resource :aspect-names]) aspect)
+                 (not (.contains (get-in % [:data :resource-before :aspect-names]) aspect)))))
+
 (defn make-filter
   "Returns a filtered tap from a predicate."
   [pred]
@@ -99,8 +104,8 @@
 (defn application [config]
   (component/system-map
     :activemq-listener (make-activemq-listener (:activemq config) (:chan @state))
-    :message-handler (make-message-handler (make-filter (event-type-filter events/node-updated)) #(t/log! %))
-    :message-handler2 (make-message-handler (make-filter (every-pred (event-type-filter events/node-created) (is-file))) #(t/log! %))
+    :message-handler (make-message-handler (make-filter (event-type-filter events/node-created)) #(t/log! %))
+    :message-handler2 (make-message-handler (make-filter (every-pred (event-type-filter events/node-updated) (is-file) (aspect-added "cm:versionable"))) #(t/log! %))
     :app (component/using
            (make-application config)
            [:activemq-listener :message-handler :message-handler2])))
