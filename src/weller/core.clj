@@ -4,10 +4,13 @@
             [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
             [immuconf.config :as immu]
-            [taoensso.telemere :as t])
+            [taoensso.telemere :as t]
+            [weller.events :as events])
   (:import (jakarta.jms Session)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
+
+(def state (atom {}))
 
 (defrecord ActiveMqListener
   [config connection channel status]
@@ -44,7 +47,7 @@
     []))
 
 (defrecord MessageHandler
-  [config channel status]
+  [channel fn status]
   component/Lifecycle
 
   (start [this]
@@ -52,7 +55,7 @@
     (let [status (atom {})]
       (swap! status assoc :running true)
       (a/go-loop [message (a/<!! channel)]
-        (t/log! message)
+        (fn message)
         (when (:running @status) (recur (a/<! channel))))
       (assoc this :status status)))
 
@@ -61,8 +64,8 @@
     (swap! status assoc :running false)
     this))
 
-(defn make-message-handler [config channel]
-  (map->MessageHandler {:config config :channel channel}))
+(defn make-message-handler [channel fn]
+  (map->MessageHandler {:channel channel :fn fn}))
 
 (defrecord Application
   [config activemq-listener message-handler message-handler2]
@@ -76,22 +79,31 @@
     (t/log! :info "stopping Application")
     this))
 
+(defn event-type-filter
+  "Returns a predicate that matches the given `event`."
+  [event]
+  (partial #(= %1 (:type %2)) event))
+
+(defn is-file
+  []
+  (partial #(= (get-in % [:data :resource :is-file]) true)))
+
+(defn make-filter
+  "Returns a filtered tap from a predicate."
+  [pred]
+  (a/tap (:mult @state) (a/chan 1 (filter pred))))
+
 (defn make-application [config]
   (map->Application config))
 
 (defn application [config]
-  (let [chan (a/chan)
-        mult (a/mult chan)]
-    (component/system-map
-      :activemq-listener (make-activemq-listener (:activemq config) chan)
-      :message-handler (make-message-handler (:alfresco config) (a/tap mult (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Updated")))))
-      :message-handler2 (make-message-handler (:alfresco config) (a/tap mult (a/chan 1 (filter #(= (:type %) "org.alfresco.event.node.Created")))))
-      :app (component/using
-             (make-application config)
-             [:activemq-listener :message-handler :message-handler2]))))
-
-{:event "org.alfresco.event.node.Updated"
- :filter (weller.filters/or (aspect-added "cm:titled") (aspect-added "cm:versionable"))}
+  (component/system-map
+    :activemq-listener (make-activemq-listener (:activemq config) (:chan @state))
+    :message-handler (make-message-handler (make-filter (event-type-filter events/node-updated)) #(t/log! %))
+    :message-handler2 (make-message-handler (make-filter (every-pred (event-type-filter events/node-created) (is-file))) #(t/log! %))
+    :app (component/using
+           (make-application config)
+           [:activemq-listener :message-handler :message-handler2])))
 
 (defn- exit
   [status msg]
@@ -100,6 +112,9 @@
 
 (defn -main
   [& args]
+
+  (swap! state assoc :chan (a/chan))
+  (swap! state assoc :mult (a/mult (:chan @state)))
 
   ;; load configuration
   (def config (atom {}))
