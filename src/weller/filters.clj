@@ -5,7 +5,7 @@
 
 (defn event?
   "Return true if message type is `event`.\\
-  E.g.
+  Example:
   ```clojure
   (event? events/node-updated)
   ```
@@ -20,7 +20,7 @@
 
 (defn aspect-added?
   "Return true when `aspect` has been added to the node.\\
-  E.g.
+  Example:
   ```clojure
   (aspect-added? cm/asp-versionable)
   ```"
