@@ -2,14 +2,14 @@
   (:require [clojure.core.async :as a]
             [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
-            [cral.utils.utils :as cu]
             [cral.model.alfresco.cm :as cm]
+            [cral.utils.utils :as cu]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [weller.events :as events]
             [weller.filters :as filters])
-  (:import (jakarta.jms Connection Session TextMessage)
-           (org.apache.activemq ActiveMQConnectionFactory))
+  (:import (jakarta.jms Session TextMessage)
+           (org.apache.activemq ActiveMQConnection ActiveMQConnectionFactory))
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -17,38 +17,36 @@
 (def state (atom {}))
 
 (defrecord ActiveMqListener
-  [config ^Connection connection chan status]
+  [config ^ActiveMQConnection connection chan]
   component/Lifecycle
 
   (start [this]
     (t/log! :info "starting ActiveMqListener")
-    (if connection
+    (if (and connection (.isStarted connection))
       this
       (let [connection-factory (new ActiveMQConnectionFactory)
-            _ (. connection-factory (setBrokerURL (format "%s://%s:%d" (:scheme config) (:host config) (:port config))))
-            ^Connection connection (.createConnection connection-factory)
+            _ (. connection-factory (setBrokerURL (format "failover:(%s://%s:%d)" (:scheme config) (:host config) (:port config))))
+            ^ActiveMQConnection connection (.createConnection connection-factory)
             session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
             topic (.createTopic session (:topic config))
             consumer (.createConsumer session topic)]
-        (swap! status assoc :running true)
         (.start connection)
         (a/go-loop [^TextMessage message nil]
           (when-not (nil? message)
             (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
-          (when (:running @status) (recur (.receive consumer))))
+          (when (.isStarted connection) (recur (.receive consumer))))
         (assoc this :connection connection))))
 
-  (stop [this]
-    (t/log! :info "stopping ActiveMqListener")
-    (swap! status assoc :running false)
-    (if-not connection
-      this
-      (do
-        (try
-          (.close connection)
-          (catch Throwable _
-            (t/log! :warn "Error while stopping component")))
-        (assoc this :connection nil :status status)))))
+    (stop [this]
+          (t/log! :info "stopping ActiveMqListener")
+          (if-not connection
+            this
+            (do
+              (try
+                (.close connection)
+                (catch Throwable _
+                  (t/log! :warn "Error while stopping component")))
+              (assoc this :connection nil)))))
 
 (defn make-activemq-listener [config chan]
   (map->ActiveMqListener {:config config :chan chan :status (atom {})}))
@@ -122,6 +120,11 @@
   (t/log! :debug @config)
 
   (let [component (component/start (system @config))]
+
+    (loop []
+      (Thread/sleep 1000)
+      (recur))
+
     (Thread/sleep 30000)
     (component/stop component)
     (Thread/sleep 1000)))
