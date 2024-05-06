@@ -29,15 +29,14 @@
             ^Connection connection (.createConnection connection-factory)
             session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
             topic (.createTopic session (:topic config))
-            consumer (.createConsumer session topic)
-            status (atom {})]
+            consumer (.createConsumer session topic)]
         (swap! status assoc :running true)
         (.start connection)
-        (a/go-loop [^TextMessage message (if (:running @status) (.receive consumer) nil)]
+        (a/go-loop [^TextMessage message nil]
           (when-not (nil? message)
             (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
           (when (:running @status) (recur (.receive consumer))))
-        (assoc this :status status :connection connection))))
+        (assoc this :connection connection))))
 
   (stop [this]
     (t/log! :info "stopping ActiveMqListener")
@@ -47,14 +46,12 @@
       (do
         (try
           (.close connection)
-          (catch Throwable t
+          (catch Throwable _
             (t/log! :warn "Error while stopping component")))
-        (assoc this :connection nil)))))
+        (assoc this :connection nil :status status)))))
 
 (defn make-activemq-listener [config chan]
-  (component/using
-    (map->ActiveMqListener {:config config :chan chan})
-    []))
+  (map->ActiveMqListener {:config config :chan chan :status (atom {})}))
 
 (defrecord MessageHandler
   [chan f status]
@@ -97,7 +94,7 @@
 (defn make-application [config]
   (map->Application config))
 
-(defn application [config]
+(defn system [config]
   (component/system-map
     :activemq-listener (make-activemq-listener (:activemq config) (:chan @state))
     :message-handler (make-handler (make-filter (filters/event? events/node-created)) #(t/log! %))
@@ -124,18 +121,7 @@
     (catch Exception e (exit 1 (.getMessage e))))
   (t/log! :debug @config)
 
-  (let [component (component/start (application @config))]
-
-    (loop []
-
-      (t/log! @(:status (:activemq-listener component)))
-      (when-not (:running @(:status (:activemq-listener component)))
-        (component/stop component)
-        (component/start component)
-        )
-      (Thread/sleep 1000)
-
-      (recur))
+  (let [component (component/start (system @config))]
     (Thread/sleep 30000)
     (component/stop component)
     (Thread/sleep 1000)))
