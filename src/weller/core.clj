@@ -3,9 +3,11 @@
             [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
+            [cral.model.alfresco.cm :as cm]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
-            [weller.events :as events])
+            [weller.events :as events]
+            [weller.filters :as filters])
   (:import (jakarta.jms Connection Session TextMessage)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
@@ -15,33 +17,42 @@
 (def state (atom {}))
 
 (defrecord ActiveMqListener
-  [config ^Connection connection channel status]
+  [config ^Connection connection chan status]
   component/Lifecycle
 
   (start [this]
     (t/log! :info "starting ActiveMqListener")
     (if connection
       this
-      (let [connection-factory (new ActiveMQConnectionFactory)
-            _ (. connection-factory (setBrokerURL (format "%s://%s:%d" (:scheme config) (:host config) (:port config))))
-            ^Connection connection (.createConnection connection-factory)
-            session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
-            topic (.createTopic session (:topic config))
-            consumer (.createConsumer session topic)
-            status (atom {})]
-        (swap! status assoc :running true)
-        (.start connection)
-        (a/go-loop [^TextMessage message (if (:running @status) (.receive consumer) nil)]
-          (when-not (nil? message)
-            (a/>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
-          (when (:running @status) (recur (.receive consumer))))
-        (assoc this :status status :connection connection))))
+      (try
+        (let [connection-factory (new ActiveMQConnectionFactory)
+              _ (. connection-factory (setBrokerURL (format "%s://%s:%d" (:scheme config) (:host config) (:port config))))
+              ^Connection connection (.createConnection connection-factory)
+              session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
+              topic (.createTopic session (:topic config))
+              consumer (.createConsumer session topic)
+              status (atom {:running false})]
+          (.start connection)
+          (swap! status assoc :running true)
+          (a/go-loop [^TextMessage message nil]
+            (when-not (nil? message)
+              (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
+            (when (:running @status) (recur (.receive consumer))))
+          (assoc this :status status :connection connection))
+        (catch Exception e (do (t/log! :error (.getMessage e))
+                               (assoc this :status (atom {:running false}) :connection nil))))))
 
   (stop [this]
     (t/log! :info "stopping ActiveMqListener")
     (swap! status assoc :running false)
-    (.close connection)
-    (assoc this :connection nil)))
+    (if-not connection
+      this
+      (do
+        (try
+          (.close connection)
+          (catch Throwable t
+            (t/log! :warn "Error while stopping component")))
+        (assoc this :connection nil)))))
 
 (defn make-activemq-listener [config channel]
   (component/using
@@ -66,11 +77,11 @@
     (swap! status assoc :running false)
     this))
 
-(defn make-message-handler [channel fn]
-  (map->MessageHandler {:channel channel :fn fn}))
+(defn make-handler [chan f]
+  (map->MessageHandler {:channel chan :fn f}))
 
 (defrecord Application
-  [config activemq-listener message-handler message-handler2]
+  [config]
   component/Lifecycle
 
   (start [this]
@@ -80,20 +91,6 @@
   (stop [this]
     (t/log! :info "stopping Application")
     this))
-
-(defn event-type-filter
-  "Returns a predicate that matches the given `event`."
-  [event]
-  (partial #(= %1 (:type %2)) event))
-
-(defn is-file
-  []
-  (partial #(= (get-in % [:data :resource :is-file]) true)))
-
-(defn aspect-added
-  [aspect]
-  (partial #(and (contains? (get-in % [:data :resource :aspect-names]) aspect)
-                 (not (contains? (get-in % [:data :resource-before :aspect-names]) aspect)))))
 
 (defn make-filter
   "Returns a filtered tap from a predicate."
@@ -106,8 +103,8 @@
 (defn application [config]
   (component/system-map
     :activemq-listener (make-activemq-listener (:activemq config) (:chan @state))
-    :message-handler (make-message-handler (make-filter (event-type-filter events/node-created)) #(t/log! %))
-    :message-handler2 (make-message-handler (make-filter (every-pred (event-type-filter events/node-updated) (is-file) (aspect-added "cm:versionable"))) #(t/log! %))
+    :message-handler (make-handler (make-filter (filters/event? events/node-created)) #(t/log! %))
+    :message-handler2 (make-handler (make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
     :app (component/using
            (make-application config)
            [:activemq-listener :message-handler :message-handler2])))
@@ -131,6 +128,13 @@
   (t/log! :debug @config)
 
   (let [component (component/start (application @config))]
+
+    (loop []
+
+      (t/log! @(:status (:activemq-listener component)))
+      (Thread/sleep 1000)
+
+      (recur))
     (Thread/sleep 30000)
     (component/stop component)
     (Thread/sleep 1000)))
