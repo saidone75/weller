@@ -6,14 +6,16 @@
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [weller.events :as events])
-  (:import (jakarta.jms Session)
+  (:import (jakarta.jms Connection Session TextMessage)
            (org.apache.activemq ActiveMQConnectionFactory))
   (:gen-class))
+
+(set! *warn-on-reflection* true)
 
 (def state (atom {}))
 
 (defrecord ActiveMqListener
-  [config connection channel status]
+  [config ^Connection connection channel status]
   component/Lifecycle
 
   (start [this]
@@ -22,14 +24,14 @@
       this
       (let [connection-factory (new ActiveMQConnectionFactory)
             _ (. connection-factory (setBrokerURL (format "%s://%s:%d" (:scheme config) (:host config) (:port config))))
-            connection (.createConnection connection-factory)
+            ^Connection connection (.createConnection connection-factory)
             session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
             topic (.createTopic session (:topic config))
             consumer (.createConsumer session topic)
             status (atom {})]
         (swap! status assoc :running true)
         (.start connection)
-        (a/go-loop [message (if (:running @status) (.receive consumer) nil)]
+        (a/go-loop [^TextMessage message (if (:running @status) (.receive consumer) nil)]
           (when-not (nil? message)
             (a/>! channel (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
           (when (:running @status) (recur (.receive consumer))))
@@ -90,8 +92,8 @@
 
 (defn aspect-added
   [aspect]
-  (partial #(and (.contains (get-in % [:data :resource :aspect-names]) aspect)
-                 (not (.contains (get-in % [:data :resource-before :aspect-names]) aspect)))))
+  (partial #(and (contains? (get-in % [:data :resource :aspect-names]) aspect)
+                 (not (contains? (get-in % [:data :resource-before :aspect-names]) aspect)))))
 
 (defn make-filter
   "Returns a filtered tap from a predicate."
