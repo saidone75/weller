@@ -13,16 +13,27 @@
 
 (set! *warn-on-reflection* true)
 
+(defn- exit
+  [status msg]
+  (if-not (nil? msg) (t/log! :info msg))
+  (System/exit status))
+
+(defn- shutdown
+  []
+  ;; stop system
+  (component/stop (:system @c/state))
+  (exit nil 0))
+
 (defrecord Application
   [config activemq-listener message-handler message-handler2]
   component/Lifecycle
 
   (start [this]
-    (t/log! :info "starting Application")
+    (t/log! :info "starting application")
     this)
 
   (stop [this]
-    (t/log! :info "stopping Application")
+    (t/log! :info "stopping application")
     this))
 
 (defn make-application [config]
@@ -36,11 +47,6 @@
     :app (component/using
            (make-application config)
            [:activemq-listener :message-handler :message-handler2])))
-
-(defn- exit
-  [status msg]
-  (if-not (nil? msg) (t/log! :info msg))
-  (System/exit status))
 
 (defn -main
   [& args]
@@ -56,8 +62,10 @@
     (catch Exception e (exit 1 (.getMessage e))))
   (t/log! :debug @config)
 
-  (let [component (component/start (system @config))]
+  (swap! c/state assoc :system (component/start (system @config)))
 
-    (loop []
-      (Thread/sleep 1000)
-      (recur))))
+  (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown))
+
+  (loop []
+    (Thread/sleep 1000)
+    (recur)))
