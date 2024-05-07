@@ -1,7 +1,14 @@
 (ns weller.filters
+  (:require [clojure.core.async :as a]
+            [weller.config :as c])
   (:import (clojure.lang PersistentVector)))
 
 (set! *warn-on-reflection* true)
+
+(defn make-filter
+  "Returns a filtered tap from a predicate."
+  [pred]
+  (a/tap (:mult @c/state) (a/chan 1 (filter pred))))
 
 (defn event?
   "Return true if message type is `event`.\\
