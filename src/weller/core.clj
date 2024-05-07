@@ -13,6 +13,10 @@
 
 (set! *warn-on-reflection* true)
 
+(defn- at-exit
+  [f]
+  (.addShutdownHook (Runtime/getRuntime) (Thread. ^ Runnable f)))
+
 (defn- exit
   [status msg]
   (if-not (nil? msg) (t/log! :info msg))
@@ -21,7 +25,12 @@
 (defn- shutdown
   []
   ;; stop system
+  (println "stop system")
   (component/stop (:system @c/state))
+  (println "shutdown agents")
+  (shutdown-agents)
+  (println "stop JVM")
+  (System/exit 0)
   (exit 0 nil))
 
 (defrecord Application
@@ -64,8 +73,5 @@
 
   (swap! c/state assoc :system (component/start (system @config)))
 
-  (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable shutdown))
-
-  (loop []
-    (Thread/sleep 1000)
-    (recur)))
+  (at-exit shutdown)
+  )
