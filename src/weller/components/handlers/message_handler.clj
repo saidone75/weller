@@ -1,5 +1,6 @@
 (ns weller.components.handlers.message-handler
   (:require [clojure.core.async :as a]
+            [com.stuartsierra.component :as component]
             [taoensso.telemere :as t])
   (:import (com.stuartsierra.component Lifecycle)))
 

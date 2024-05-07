@@ -22,7 +22,7 @@
   []
   ;; stop system
   (component/stop (:system @c/state))
-  (exit nil 0))
+  (exit 0 nil))
 
 (defrecord Application
   [config activemq-listener message-handler message-handler2]
