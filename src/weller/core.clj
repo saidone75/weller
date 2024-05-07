@@ -64,7 +64,7 @@
 
   (swap! c/state assoc :system (component/start (system @config)))
 
-  (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown))
+  (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable shutdown))
 
   (loop []
     (Thread/sleep 1000)
