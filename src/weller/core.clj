@@ -15,7 +15,7 @@
 
 (defn- at-exit
   [f]
-  (.addShutdownHook (Runtime/getRuntime) (Thread. ^ Runnable f)))
+  (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable f)))
 
 (defn- exit
   [status msg]
@@ -25,13 +25,8 @@
 (defn- shutdown
   []
   ;; stop system
-  (println "stop system")
   (component/stop (:system @c/state))
-  (println "shutdown agents")
-  (shutdown-agents)
-  (println "stop JVM")
-  (System/exit 0)
-  (exit 0 nil))
+  (.halt (Runtime/getRuntime) 0))
 
 (defrecord Application
   [config activemq-listener message-handler message-handler2]
@@ -73,5 +68,4 @@
 
   (swap! c/state assoc :system (component/start (system @config)))
 
-  (at-exit shutdown)
-  )
+  (at-exit shutdown))
