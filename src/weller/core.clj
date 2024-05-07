@@ -4,6 +4,7 @@
             [cral.model.alfresco.cm :as cm]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
+            [weller.components.application :as application]
             [weller.components.handlers.message-handler :as handler]
             [weller.components.listeners.activemq :as activemq]
             [weller.config :as c]
@@ -26,22 +27,7 @@
   []
   ;; stop system
   (component/stop (:system @c/state))
-  (.halt (Runtime/getRuntime) 0))
-
-(defrecord Application
-  [config activemq-listener message-handler message-handler2]
-  component/Lifecycle
-
-  (start [this]
-    (t/log! :info "starting application")
-    this)
-
-  (stop [this]
-    (t/log! :info "stopping application")
-    this))
-
-(defn make-application [config]
-  (map->Application config))
+  (shutdown-agents))
 
 (defn system [config]
   (component/system-map
@@ -49,7 +35,7 @@
     :message-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
     :message-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
     :app (component/using
-           (make-application config)
+           (application/make-application)
            [:activemq-listener :message-handler :message-handler2])))
 
 (defn -main
@@ -66,6 +52,7 @@
     (catch Exception e (exit 1 (.getMessage e))))
   (t/log! :debug @config)
 
+  ;; start system
   (swap! c/state assoc :system (component/start (system @config)))
 
   (at-exit shutdown))
