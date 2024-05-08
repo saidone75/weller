@@ -43,9 +43,9 @@
   (component/stop (:system @c/state))
   (shutdown-agents))
 
-(defn system [config]
+(defn- system []
   (component/system-map
-    :activemq-listener (activemq/make-listener (:activemq config) (:chan @c/state))
+    :activemq-listener (activemq/make-listener (:activemq @c/config) (:chan @c/state))
     :message-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
     :message-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
     :app (component/using
@@ -60,13 +60,12 @@
   (swap! c/state assoc :mult (a/mult (:chan @c/state)))
 
   ;; load configuration
-  (def config (atom {}))
   (try
-    (reset! config (immu/load "resources/config.edn"))
+    (reset! c/config (immu/load "resources/config.edn"))
     (catch Exception e (exit 1 (.getMessage e))))
-  (t/log! :debug @config)
+  (t/log! :debug @c/config)
 
   ;; start system
-  (swap! c/state assoc :system (component/start (system @config)))
+  (swap! c/state assoc :system (component/start (system)))
 
   (on-exit shutdown))
