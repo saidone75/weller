@@ -21,7 +21,7 @@
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [weller.components.application :as application]
-            [weller.components.handlers.message-handler :as handler]
+            [weller.components.handlers.event-handler :as handler]
             [weller.components.listeners.activemq :as activemq]
             [weller.config :as c]
             [weller.events :as events]
@@ -46,11 +46,11 @@
 (defn- system []
   (component/system-map
     :activemq-listener (activemq/make-listener (:activemq @c/config) (:chan @c/state))
-    :message-handler1 (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
-    :message-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
+    :event-handler1 (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
+    :event-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
     :app (component/using
            (application/make-application)
-           [:activemq-listener :message-handler1 :message-handler2])))
+           [:activemq-listener :event-handler1 :event-handler2])))
 
 (defn -main
   [& args]

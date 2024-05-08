@@ -14,17 +14,17 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.components.handlers.message-handler
+(ns weller.components.handlers.event-handler
   (:require [clojure.core.async :as a]
             [com.stuartsierra.component :as component]
             [taoensso.telemere :as t]))
 
-(defrecord MessageHandler
+(defrecord EventHandler
   [chan f status]
   component/Lifecycle
 
   (start [this]
-    (t/log! :info "starting MessageHandler")
+    (t/log! :info "starting EventHandler")
     (let [status (atom {})]
       (swap! status assoc :running true)
       (a/go-loop [message (a/<! chan)]
@@ -33,9 +33,9 @@
       (assoc this :status status)))
 
   (stop [this]
-    (t/log! :info "stopping MessageHandler")
+    (t/log! :info "stopping EventHandler")
     (swap! status assoc :running false)
     this))
 
 (defn make-handler [chan f]
-  (map->MessageHandler {:chan chan :f f}))
+  (map->EventHandler {:chan chan :f f}))
