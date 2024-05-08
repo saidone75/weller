@@ -27,7 +27,7 @@
     (t/log! :info "starting MessageHandler")
     (let [status (atom {})]
       (swap! status assoc :running true)
-      (a/go-loop [message (a/<!! chan)]
+      (a/go-loop [message (a/<! chan)]
         (f message)
         (when (:running @status) (recur (a/<! chan))))
       (assoc this :status status)))
