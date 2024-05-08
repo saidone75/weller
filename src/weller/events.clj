@@ -16,5 +16,11 @@
 
 (ns weller.events)
 
-(def node-updated "org.alfresco.event.node.Updated")
-(def node-created "org.alfresco.event.node.Created")
+(def ^:const node-created "org.alfresco.event.node.Created")
+(def ^:const node-updated "org.alfresco.event.node.Updated")
+(def ^:const node-deleted "org.alfresco.event.node.Deleted")
+(def ^:const child-assoc-created "org.alfresco.event.assoc.child.Created")
+(def ^:const child-assoc-deleted "org.alfresco.event.assoc.child.Deleted")
+(def ^:const peer-assoc-created "org.alfresco.event.assoc.peer.Created")
+(def ^:const peer-assoc-deleted "org.alfresco.event.assoc.peer.Deleted")
+(def ^:const permission-updated "org.alfresco.event.permission.Updated")
