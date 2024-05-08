@@ -46,11 +46,11 @@
 (defn- system []
   (component/system-map
     :activemq-listener (activemq/make-listener (:activemq @c/config) (:chan @c/state))
-    :message-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
+    :message-handler1 (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
     :message-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
     :app (component/using
            (application/make-application)
-           [:activemq-listener :message-handler :message-handler2])))
+           [:activemq-listener :message-handler1 :message-handler2])))
 
 (defn -main
   [& args]

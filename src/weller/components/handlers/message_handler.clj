@@ -28,7 +28,7 @@
     (let [status (atom {})]
       (swap! status assoc :running true)
       (a/go-loop [message (a/<! chan)]
-        (f message)
+        (f (get-in message [:data :resource]))
         (when (:running @status) (recur (a/<! chan))))
       (assoc this :status status)))
 
