@@ -20,9 +20,29 @@
   (:import (clojure.lang PersistentVector)))
 
 (defn make-filter
-  "Returns a filtered tap from a predicate."
+  "Do not really make a filter, but returns a filtered tap (connected to a mult) from a predicate `pred`."
   [pred]
   (a/tap (:mult @c/state) (a/chan 1 (filter pred))))
+
+(defn aspect-added?
+  "Return true when `aspect` has been added to the node.\\
+  Example:
+  ```clojure
+  (aspect-added? cm/asp-versionable)
+  ```"
+  [aspect]
+  (partial #(and (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect)
+                 (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))
+
+(defn aspect-removed?
+  "Return true when `aspect` has been removed to the node.\\
+  Example:
+  ```clojure
+  (aspect-removed? cm/asp-versionable)
+  ```"
+  [aspect]
+  (partial #(and (not (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect))
+                 (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect))))
 
 (defn event?
   "Return true if message type is `event`.\\
@@ -39,12 +59,3 @@
   []
   (partial #(= (get-in % [:data :resource :is-file]) true)))
 
-(defn aspect-added?
-  "Return true when `aspect` has been added to the node.\\
-  Example:
-  ```clojure
-  (aspect-added? cm/asp-versionable)
-  ```"
-  [aspect]
-  (partial #(and (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect)
-                 (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))

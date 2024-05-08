@@ -1,6 +1,6 @@
 # weller
 
-FIXME: description
+Weller is somewhat like Alfresco out-of-process extensions but in pure Clojure.
 
 ## Installation
 
