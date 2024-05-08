@@ -3,8 +3,6 @@
             [weller.config :as c])
   (:import (clojure.lang PersistentVector)))
 
-(set! *warn-on-reflection* true)
-
 (defn make-filter
   "Returns a filtered tap from a predicate."
   [pred]

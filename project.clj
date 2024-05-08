@@ -12,16 +12,8 @@
                  [russellwhitaker/immuconf "0.3.0"]
                  [org.clojure/core.async "1.6.681"]
                  [com.github.clj-easy/graal-build-time "1.0.5"]]
-  :plugins [[io.taylorwood/lein-native-image "0.3.1"]]
   :main ^:skip-aot weller.core
   :target-path "target/%s"
-  :native-image {:name "weller"
-                 :opts ["-J-Xmx3g"
-                        "--report-unsupported-elements-at-runtime"
-                        "-H:EnableURLProtocols=http"
-                        "-H:ReflectionConfigurationFiles=./reflectconfig.json"
-                        "--features=clj_easy.graal_build_time.InitClojureClasses"
-                        "-H:+ReportExceptionStackTraces"]}
   :profiles {:uberjar {:aot      :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]}})

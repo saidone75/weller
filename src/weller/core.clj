@@ -12,9 +12,7 @@
             [weller.filters :as filters])
   (:gen-class))
 
-(set! *warn-on-reflection* true)
-
-(defn- at-exit
+(defn- on-exit
   [f]
   (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable f)))
 
@@ -55,4 +53,4 @@
   ;; start system
   (swap! c/state assoc :system (component/start (system @config)))
 
-  (at-exit shutdown))
+  (on-exit shutdown))

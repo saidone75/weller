@@ -1,10 +1,10 @@
 (ns weller.components.application
-  (:require [taoensso.telemere :as t])
-  (:import (com.stuartsierra.component Lifecycle)))
+  (:require [com.stuartsierra.component :as component]
+            [taoensso.telemere :as t]))
 
 (defrecord Application
   [config]
-  Lifecycle
+  component/Lifecycle
 
   (start [this]
     (t/log! :info "starting application")

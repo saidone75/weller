@@ -1,15 +1,15 @@
 (ns weller.components.listeners.activemq
   (:require [clojure.core.async :as a]
             [clojure.data.json :as json]
+            [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
             [taoensso.telemere :as t])
-  (:import (com.stuartsierra.component Lifecycle)
-           (jakarta.jms Session TextMessage)
+  (:import (jakarta.jms Session TextMessage)
            (org.apache.activemq ActiveMQConnection ActiveMQConnectionFactory)))
 
 (defrecord Listener
-  [config ^ActiveMQConnection connection chan]
-  Lifecycle
+  [config connection chan]
+  component/Lifecycle
 
   (start [this]
     (t/log! :info "starting ActiveMQ listener")

@@ -1,12 +1,11 @@
 (ns weller.components.handlers.message-handler
   (:require [clojure.core.async :as a]
             [com.stuartsierra.component :as component]
-            [taoensso.telemere :as t])
-  (:import (com.stuartsierra.component Lifecycle)))
+            [taoensso.telemere :as t]))
 
 (defrecord MessageHandler
   [chan f status]
-  Lifecycle
+  component/Lifecycle
 
   (start [this]
     (t/log! :info "starting MessageHandler")
