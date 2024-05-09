@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.components.listeners.activemq
+(ns weller.components.activemq
   (:require [clojure.core.async :as a]
             [clojure.data.json :as json]
             [com.stuartsierra.component :as component]

@@ -21,8 +21,8 @@
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [weller.components.application :as application]
-            [weller.components.handlers.event-handler :as handler]
-            [weller.components.listeners.activemq :as activemq]
+            [weller.components.event-handler :as handler]
+            [weller.components.activemq :as activemq]
             [weller.config :as c]
             [weller.events :as events]
             [weller.filters :as filters])

@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.components.handlers.event-handler
+(ns weller.components.event-handler
   (:require [clojure.core.async :as a]
             [com.stuartsierra.component :as component]
             [taoensso.telemere :as t]))
