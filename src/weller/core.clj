@@ -25,17 +25,15 @@
             [weller.components.activemq :as activemq]
             [weller.config :as c]
             [weller.events :as events]
-            [weller.filters :as filters])
+            [weller.filters :as filters]
+            [weller.system :as system])
   (:gen-class))
 
 (defn- on-exit
   [f]
   (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable f)))
 
-(defn- exit
-  [status msg]
-  (if-not (nil? msg) (t/log! :info msg))
-  (System/exit status))
+
 
 (defn- shutdown
   []
@@ -43,29 +41,25 @@
   (component/stop (:system @c/state))
   (shutdown-agents))
 
-(defn- system []
-  (component/system-map
-    :activemq-listener (activemq/make-listener (:activemq @c/config) (:chan @c/state))
-    :event-handler1 (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %))
-    :event-handler2 (handler/make-handler (filters/make-filter (every-pred (filters/event? events/node-updated) (filters/is-file?) (filters/aspect-added? cm/asp-versionable))) #(t/log! %))
-    :app (component/using
-           (application/make-application)
-           [:activemq-listener :event-handler1 :event-handler2])))
+
 
 (defn -main
   [& args]
 
-  ;; set up channels
-  (swap! c/state assoc :chan (a/chan))
-  (swap! c/state assoc :mult (a/mult (:chan @c/state)))
+  (let [system (system/make-system)]
 
-  ;; load configuration
-  (try
-    (reset! c/config (immu/load "resources/config.edn"))
-    (catch Exception e (exit 1 (.getMessage e))))
-  (t/log! :debug @c/config)
+    (system/add-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %)))
+    (system/add-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %)))
 
-  ;; start system
-  (swap! c/state assoc :system (component/start (system)))
+    (system/start-system)
 
-  (on-exit shutdown))
+    (println system)
+
+    )
+
+
+
+
+
+
+  )
