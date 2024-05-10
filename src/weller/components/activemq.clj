@@ -56,4 +56,4 @@
         (assoc this :connection nil)))))
 
 (defn make-listener [config chan]
-  (map->Listener {:config config :chan chan :status (atom {})}))
+  (map->Listener {:config config :chan chan}))
