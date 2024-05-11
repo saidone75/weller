@@ -27,6 +27,9 @@
 
   (def handler (-> (handler/make-handler)
                    (handler/add-tap (filters/event? events/node-created) #(t/log! %))
-                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))))
+                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))
+                   (component/start)))
 
-  (component/start handler))
+  (Thread/sleep 30000)
+
+  (component/stop handler))

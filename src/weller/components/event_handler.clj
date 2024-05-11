@@ -25,16 +25,14 @@
 
   (start [this]
     (t/log! :info "starting EventHandler")
-    (let [running true]
+    (let [this (assoc this :running true)]
       (a/go-loop [message (a/<! chan)]
-        (println "msg from tap " message)
         (f (get-in message [:data :resource]))
-        (when running (recur (a/<! chan)))))
-    (assoc this :running true))
+        (when (:running this) (recur (a/<! chan))))
+      this))
 
   (stop [this]
     (t/log! :info "stopping EventHandler")
-
     (assoc this :running false)))
 
 (defn make-handler [chan f]

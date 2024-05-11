@@ -40,7 +40,6 @@
         (.start connection)
         (a/go-loop [^TextMessage message nil]
           (when-not (nil? message)
-            (println "message from amq " message)
             (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
           (when (.isStarted connection) (recur (.receive consumer))))
         (assoc this :connection connection))))

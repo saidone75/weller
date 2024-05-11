@@ -13,11 +13,14 @@
   component/Component
 
   (start [this]
-    (component/start (:listener this))
-    (run! component/start (:taps this)))
+    (assoc this
+      :listener (component/start (:listener this))
+      :taps (doall (map component/start (:taps this)))))
 
-  (stop [handler]
-    handler))
+  (stop [this]
+    (assoc this
+      :taps (doall (map component/stop (:taps this)))
+      :listener (component/stop (:listener this)))))
 
 (defn add-tap [this pred f]
   (assoc this :taps (conj (:taps this) (eh/make-handler (filters/make-filter (:mult this) pred) f))))
