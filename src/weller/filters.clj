@@ -15,14 +15,13 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.filters
-  (:require [clojure.core.async :as a]
-            [weller.config :as c])
+  (:require [clojure.core.async :as a])
   (:import (clojure.lang PersistentVector)))
 
 (defn make-filter
-  "Do not really make a filter, but returns a filtered tap (connected to a mult) from a predicate `pred`."
-  [pred]
-  (a/tap (:mult @c/state) (a/chan 1 (filter pred))))
+  "Do not really make a filter, but returns a filtered (by predicate `pred`) tap connected to the `mult`."
+  [mult pred]
+  (a/tap mult (a/chan 1 (filter pred))))
 
 (defn aspect-added?
   "Return true when `aspect` has been added to the node.\\

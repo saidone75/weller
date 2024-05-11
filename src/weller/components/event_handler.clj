@@ -16,26 +16,26 @@
 
 (ns weller.components.event-handler
   (:require [clojure.core.async :as a]
-            [com.stuartsierra.component :as component]
-            [taoensso.telemere :as t]))
+            [taoensso.telemere :as t]
+            [weller.components.component :as component]))
 
 (defrecord EventHandler
-  [chan f status]
-  component/Lifecycle
+  [chan f running]
+  component/Component
 
   (start [this]
     (t/log! :info "starting EventHandler")
-    (let [status (atom {})]
-      (swap! status assoc :running true)
+    (let [running true]
       (a/go-loop [message (a/<! chan)]
+        (println "msg from tap " message)
         (f (get-in message [:data :resource]))
-        (when (:running @status) (recur (a/<! chan))))
-      (assoc this :status status)))
+        (when running (recur (a/<! chan)))))
+    (assoc this :running true))
 
   (stop [this]
     (t/log! :info "stopping EventHandler")
-    (swap! status assoc :running false)
-    this))
+
+    (assoc this :running false)))
 
 (defn make-handler [chan f]
   (map->EventHandler {:chan chan :f f}))

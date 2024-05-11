@@ -15,51 +15,18 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.core
-  (:require [clojure.core.async :as a]
-            [com.stuartsierra.component :as component]
-            [cral.model.alfresco.cm :as cm]
-            [immuconf.config :as immu]
-            [taoensso.telemere :as t]
-            [weller.components.application :as application]
-            [weller.components.event-handler :as handler]
-            [weller.components.activemq :as activemq]
-            [weller.config :as c]
+  (:require [taoensso.telemere :as t]
+            [weller.components.component :as component]
             [weller.events :as events]
             [weller.filters :as filters]
-            [weller.system :as system])
+            [weller.handler :as handler])
   (:gen-class))
-
-(defn- on-exit
-  [f]
-  (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable f)))
-
-
-
-(defn- shutdown
-  []
-  ;; stop system
-  (component/stop (:system @c/state))
-  (shutdown-agents))
-
-
 
 (defn -main
   [& args]
 
-  (let [system (system/make-system)]
+  (def handler (-> (handler/make-handler)
+                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))
+                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))))
 
-    (system/add-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %)))
-    (system/add-handler (handler/make-handler (filters/make-filter (filters/event? events/node-created)) #(t/log! %)))
-
-    (system/start-system)
-
-    (println system)
-
-    )
-
-
-
-
-
-
-  )
+  (component/start handler))

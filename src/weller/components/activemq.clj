@@ -17,15 +17,15 @@
 (ns weller.components.activemq
   (:require [clojure.core.async :as a]
             [clojure.data.json :as json]
-            [com.stuartsierra.component :as component]
             [cral.utils.utils :as cu]
-            [taoensso.telemere :as t])
+            [taoensso.telemere :as t]
+            [weller.components.component :as component])
   (:import (jakarta.jms Session TextMessage)
            (org.apache.activemq ActiveMQConnection ActiveMQConnectionFactory)))
 
 (defrecord Listener
   [config connection chan]
-  component/Lifecycle
+  component/Component
 
   (start [this]
     (t/log! :info "starting ActiveMQ listener")
@@ -40,6 +40,7 @@
         (.start connection)
         (a/go-loop [^TextMessage message nil]
           (when-not (nil? message)
+            (println "message from amq " message)
             (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
           (when (.isStarted connection) (recur (.receive consumer))))
         (assoc this :connection connection))))
