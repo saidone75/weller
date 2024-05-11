@@ -19,7 +19,7 @@
   (:import (clojure.lang PersistentVector)))
 
 (defn make-filter
-  "Do not really make a filter, but returns a filtered (by predicate `pred`) tap connected to the `mult`."
+  "Do not really make a filter but returns a filtered (by predicate `pred`) tap connected to the `mult` channel."
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
@@ -34,7 +34,7 @@
                  (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))
 
 (defn aspect-removed?
-  "Return true when `aspect` has been removed to the node.\\
+  "Return true when `aspect` has been removed from the node.\\
   Example:
   ```clojure
   (aspect-removed? cm/asp-versionable)
@@ -49,7 +49,7 @@
   ```clojure
   (event? events/node-updated)
   ```
-  will return true when the message :type key is org.alfresco.event.node.Updated."
+  will return true when the message :type key is org.alfresco.event.node.Updated. Supported message types are defined in [[weller.events]]"
   [event]
   (partial #(= %1 (:type %2)) event))
 

@@ -30,6 +30,6 @@
                    (handler/add-tap (filters/event? events/node-created) #(t/log! %))
                    (component/start)))
 
-  (Thread/sleep 30000)
+  (Thread/sleep 5000)
 
   (component/stop handler))
