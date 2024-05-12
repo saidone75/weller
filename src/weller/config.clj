@@ -17,4 +17,3 @@
 (ns weller.config)
 
 (def config (atom {}))
-(def state (atom {}))
