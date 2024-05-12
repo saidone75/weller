@@ -56,7 +56,7 @@
 (defn assoc-type?
   "Return true when an event correspond to a specific association type."
   [assoc-type]
-  (partial #(= (get-in % [:data :resource :assoc-qname]) assoc-type)))
+  (partial #(= (get-in % [:data :resource :assoc-type]) (name assoc-type))))
 
 (defn is-file?
   "Return true when the node is a file."

@@ -42,7 +42,9 @@
         (.start connection)
         (a/go-loop [^TextMessage message nil]
           (when-not (nil? message)
-            (a/>! chan (cu/kebab-keywordize-keys (json/read-str (.getText message)))))
+            (let [message (cu/kebab-keywordize-keys (json/read-str (.getText message)))]
+              (t/trace! message)
+              (a/>! chan message)))
           (when (.isStarted connection) (recur (.receive consumer))))
         (assoc this :connection connection))))
 

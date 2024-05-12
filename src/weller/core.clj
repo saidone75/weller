@@ -15,18 +15,19 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.core
-  (:require [taoensso.telemere :as t]
+  (:require [cral.model.alfresco.cm :as cm]
+            [taoensso.telemere :as t]
             [weller.components.component :as component]
+            [weller.event-handler :as handler]
             [weller.events :as events]
-            [weller.filters :as filters]
-            [weller.event-handler :as handler])
+            [weller.filters :as filters])
   (:gen-class))
 
 (defn -main
   [& args]
 
   (def handler (-> (handler/make-handler)
-                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))
+                   (handler/add-tap (filters/assoc-type? cm/assoc-original) #(t/log! %))
                    (handler/add-tap (filters/event? events/node-created) #(t/log! %))
                    (component/start)))
 
