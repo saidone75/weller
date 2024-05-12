@@ -18,8 +18,9 @@
   (:require [clojure.core.async :as a])
   (:import (clojure.lang PersistentVector)))
 
-(defn make-filter
-  "Do not really make a filter but returns a filtered (by predicate `pred`) tap connected to the `mult` channel."
+(defn make-filtered-tap
+  "Return a filtered tap connected to the `mult` channel.
+  The returned tap is filtered by predicate `pred`."
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
