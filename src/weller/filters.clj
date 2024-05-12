@@ -23,6 +23,16 @@
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
+(defn event?
+  "Return true if message type is `event`.\\
+  Example:
+  ```clojure
+  (event? events/node-updated)
+  ```
+  will return true when the message :type key is org.alfresco.event.node.Updated. Supported message types are defined in [[weller.events]]"
+  [event]
+  (partial #(= %1 (:type %2)) event))
+
 (defn aspect-added?
   "Return true when `aspect` has been added to the node.\\
   Example:
@@ -43,15 +53,10 @@
   (partial #(and (not (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect))
                  (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect))))
 
-(defn event?
-  "Return true if message type is `event`.\\
-  Example:
-  ```clojure
-  (event? events/node-updated)
-  ```
-  will return true when the message :type key is org.alfresco.event.node.Updated. Supported message types are defined in [[weller.events]]"
-  [event]
-  (partial #(= %1 (:type %2)) event))
+(defn assoc-type?
+  "Return true when an event correspond to a specific association type."
+  [assoc-type]
+  (partial #(= (get-in % [:data :resource :assoc-qname]) assoc-type)))
 
 (defn is-file?
   "Return true when the node is a file."

@@ -14,17 +14,17 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.handler
+(ns weller.event-handler
   (:require [clojure.core.async :as a]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]
             [weller.components.activemq :as activemq]
             [weller.components.component :as component]
-            [weller.components.event-handler :as eh]
+            [weller.components.message-handler :as mh]
             [weller.config :as c]
             [weller.filters :as filters]))
 
-(defrecord Handler
+(defrecord EventHandler
   [listener taps chan mult]
   component/Component
 
@@ -39,7 +39,7 @@
       :listener (component/stop (:listener this)))))
 
 (defn add-tap [this pred f]
-  (assoc this :taps (conj (:taps this) (eh/make-handler (filters/make-filter (:mult this) pred) f))))
+  (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-filter (:mult this) pred) f))))
 
 (defn make-handler
   []
@@ -50,7 +50,7 @@
   (t/log! :debug @c/config)
 
   (let [chan (a/chan)]
-    (map->Handler {:listener (activemq/make-listener (:activemq @c/config) chan)
+    (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
                    :taps     []
                    :chan     chan
                    :mult     (a/mult chan)})))

@@ -23,13 +23,15 @@
   (:import (jakarta.jms Session TextMessage)
            (org.apache.activemq ActiveMQConnection ActiveMQConnectionFactory)))
 
+(def name "ActiveMQ listener")
+
 (defrecord Listener
   [config connection chan]
   component/Component
 
   (start [this]
-    (t/log! :info "starting ActiveMQ listener")
-    (if (and connection (.isStarted connection))
+    (t/log! :info (format "starting %s" name))
+    (if connection
       this
       (let [connection-factory (new ActiveMQConnectionFactory)
             _ (. connection-factory (setBrokerURL (format "failover:(%s://%s:%d)" (:scheme config) (:host config) (:port config))))
@@ -45,14 +47,14 @@
         (assoc this :connection connection))))
 
   (stop [this]
-    (t/log! :info "stopping ActiveMQ listener")
+    (t/log! :info (format "stopping %s" name))
     (if-not connection
       this
       (do
         (try
           (.close connection)
           (catch Throwable _
-            (t/log! :warn "error while stopping component")))
+            (t/log! :warn (format "error while stopping " name))))
         (assoc this :connection nil)))))
 
 (defn make-listener [config chan]

@@ -19,7 +19,7 @@
             [weller.components.component :as component]
             [weller.events :as events]
             [weller.filters :as filters]
-            [weller.handler :as handler])
+            [weller.event-handler :as handler])
   (:gen-class))
 
 (defn -main
