@@ -16,4 +16,20 @@
 
 (ns weller.core-test
   (:require [clojure.test :refer :all]
-            [weller.core :refer :all]))
+            [cral.model.alfresco.cm :as cm]
+            [taoensso.telemere :as t]
+            [weller.components.component :as component]
+            [weller.core :refer :all]
+            [weller.event-handler :as handler]
+            [weller.filters :as filters]))
+
+(deftest core-test
+  (def handler (-> (handler/make-handler)
+                   ;(handler/add-tap (filters/assoc-type? cm/assoc-original) #(t/log! %))
+                   ;(handler/add-tap (filters/event? events/node-updated) #(t/log! %))
+                   (handler/add-tap (filters/node-aspect? cm/asp-auditable) #(t/log! %))
+                   (component/start)))
+
+  (Thread/sleep 30000)
+
+  (component/stop handler))

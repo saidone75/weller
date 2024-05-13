@@ -42,8 +42,9 @@
   (aspect-added? cm/asp-versionable)
   ```"
   [aspect]
-  (partial #(and (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect)
-                 (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))
+  (partial #(and
+              (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect)
+              (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))
 
 (defn aspect-removed?
   "Return true when `aspect` has been removed from the node.\\
@@ -52,8 +53,9 @@
   (aspect-removed? cm/asp-versionable)
   ```"
   [aspect]
-  (partial #(and (not (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect))
-                 (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect))))
+  (partial #(and
+              (not (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect))
+              (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect))))
 
 (defn assoc-type?
   "Return true when an event correspond to a specific association type."
@@ -89,3 +91,11 @@
               (and
                 (= (:node-type resource) (name cm/type-content))
                 (= (get-in resource [:content :mime-type]) mime-type)))))
+
+(defn node-aspect?
+  "Return true when a node has the given `aspect`"
+  [aspect]
+  (partial #(let [resource (get-in % [:data :resource])]
+              (and
+                (= ((keyword "@type") resource) "NodeResource")
+                (and (not (nil? (:aspect-names resource))) (.contains ^PersistentVector (:aspect-names resource) (name aspect)))))))
