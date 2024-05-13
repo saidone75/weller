@@ -28,7 +28,7 @@
 
   (def handler (-> (handler/make-handler)
                    (handler/add-tap (filters/assoc-type? cm/assoc-original) #(t/log! %))
-                   (handler/add-tap (filters/event? events/node-created) #(t/log! %))
+                   (handler/add-tap (filters/event? events/node-updated) #(t/log! %))
                    (component/start)))
 
   (Thread/sleep 30000)
