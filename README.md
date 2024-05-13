@@ -1,6 +1,6 @@
 # weller
 
-Weller is somewhat like Alfresco out-of-process extensions but in pure Clojure.
+Weller is like Alfresco out-of-process extensions but in pure Clojure.
 
 ## Installation
 
