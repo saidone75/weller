@@ -15,7 +15,8 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.filters
-  (:require [clojure.core.async :as a])
+  (:require [clojure.core.async :as a]
+            [cral.model.alfresco.cm :as cm])
   (:import (clojure.lang PersistentVector)))
 
 (defn make-filtered-tap
@@ -59,8 +60,32 @@
   [assoc-type]
   (partial #(= (get-in % [:data :resource :assoc-type]) (name assoc-type))))
 
+(defn content-added?
+  ;; TODO
+  "Return true when content is added to an existing `cm:content`node."
+  []
+  (partial true?))
+
+(defn content-changed?
+  ;; TODO
+  "Return true when the content of an existing `cm:content`node is updated."
+  []
+  )
+
 (defn is-file?
   "Return true when the node is a file."
   []
   (partial #(= (get-in % [:data :resource :is-file]) true)))
 
+(defn is-folder?
+  "Return true when the node is a folder."
+  []
+  (partial #(= (get-in % [:data :resource :is-folder]) true)))
+
+(defn mime-type?
+  "Return true when a `cm:content` node has the given MIME type."
+  [mime-type]
+  (partial #(let [resource (get-in % [:data :resource])]
+              (and
+                (= (:node-type resource) (name cm/type-content))
+                (= (get-in resource [:content :mime-type]) mime-type)))))
