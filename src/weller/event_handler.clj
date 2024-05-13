@@ -42,15 +42,19 @@
   (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-filtered-tap (:mult this) pred) f))))
 
 (defn make-handler
-  []
-  ;; load config
-  (try
-    (reset! c/config (immu/load "resources/config.edn"))
-    (catch Exception e (t/log! :error (.getMessage e))))
-  (t/log! :debug @c/config)
+  ([]
+   ;; load config
+   (try
+     (reset! c/config (immu/load "resources/config.edn"))
+     (catch Exception e (t/log! :error (.getMessage e))))
+   (t/log! :debug @c/config)
 
-  (let [chan (a/chan)]
-    (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
-                   :taps     []
-                   :chan     chan
-                   :mult     (a/mult chan)})))
+   (let [chan (a/chan)]
+     (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
+                         :taps     []
+                         :chan     chan
+                         :mult     (a/mult chan)})))
+  ([pred f]
+   (-> (make-handler)
+       (add-tap pred f)
+       (component/start))))
