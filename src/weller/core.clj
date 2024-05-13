@@ -27,8 +27,9 @@
   [& args]
 
   (def handler (-> (handler/make-handler)
-                   (handler/add-tap (filters/assoc-type? cm/assoc-original) #(t/log! %))
-                   (handler/add-tap (filters/event? events/node-updated) #(t/log! %))
+                   ;(handler/add-tap (filters/assoc-type? cm/assoc-original) #(t/log! %))
+                   ;(handler/add-tap (filters/event? events/node-updated) #(t/log! %))
+                   (handler/add-tap (filters/node-aspect? cm/asp-auditable) #(t/log! %))
                    (component/start)))
 
   (Thread/sleep 30000)
