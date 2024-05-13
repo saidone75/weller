@@ -16,16 +16,18 @@
 
 (ns weller.core-test
   (:require [clojure.test :refer :all]
-            [cral.model.alfresco.cm :as cm]
-            [taoensso.telemere :as t]
             [weller.components.component :as component]
             [weller.core :refer :all]
             [weller.event-handler :as handler]
+            [weller.events :as events]
             [weller.filters :as filters]
-            [weller.events :as events]))
+            [weller.test-utils :as tu])
+  (:import (java.util UUID)))
 
 (deftest node-created-test
-  (def res (promise))
-  (def handler (handler/make-handler (filters/event? events/node-created) #(deliver res %)))
-  (println @res)
+  (def resource (promise))
+  (def handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %)))
+  (let [name (.toString (UUID/randomUUID))]
+    (tu/create-then-delete-node name)
+    (is (= (:name @resource)) name))
   (component/stop handler))
