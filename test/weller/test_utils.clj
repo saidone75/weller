@@ -33,6 +33,8 @@
        (#(get-in % [:body :entry :id]))))
 
 (defn- create-node
+  ([]
+   (create-node (.toString (UUID/randomUUID))))
   ([name]
    (create-node name (get-guest-home)))
   ([name parent-id]
@@ -61,12 +63,13 @@
        (update-node)
        (delete-node)))
 
-(defn create-child-assoc
+(defn create-then-delete-child-assoc
   []
   (let [parent-node-id (create-folder)
-        child-node-id (create-node (.toString (UUID/randomUUID)))]
+        child-node-id (create-node)]
     (->> [(model/map->CreateSecondaryChildBody {:child-id child-node-id :assoc-type cm/assoc-contains})]
          (nodes/create-secondary-child (:ticket @c/config) parent-node-id))
+    (nodes/delete-secondary-child (:ticket @c/config) parent-node-id child-node-id)
     (delete-node child-node-id)
     (delete-node parent-node-id)))
 
