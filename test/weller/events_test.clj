@@ -31,7 +31,7 @@
   (let [resource (promise)
         handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %))
         name (.toString (UUID/randomUUID))]
-    (tu/create-then-delete-node name)
+    (tu/create-then-update-then-delete-node name)
     (is (= (:name @resource) name))
     (component/stop handler)))
 

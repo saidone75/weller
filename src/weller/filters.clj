@@ -43,8 +43,8 @@
   ```"
   [aspect]
   (partial #(and
-              (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect)
-              (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect)))))
+              (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) (name aspect))
+              (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) (name aspect))))))
 
 (defn aspect-removed?
   "Return true when `aspect` has been removed from the node.\\
