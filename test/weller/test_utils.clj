@@ -16,22 +16,39 @@
 
 (ns weller.test-utils
   (:require [clojure.test :refer :all]
-            [cral.api.auth :as auth]
             [cral.api.core.nodes :as nodes]
             [cral.model.alfresco.cm :as cm]
             [cral.model.core :as model]
-            [weller.config :as config]))
+            [weller.config :as c])
+  (:import (java.util UUID)))
 
 (defn get-guest-home
   [ticket]
   (get-in (nodes/get-node ticket "-root-" (model/map->GetNodeQueryParams {:relative-path "/Guest Home"})) [:body :entry :id]))
 
+(defn- create-node
+  [name]
+  (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
+       (nodes/create-node (:ticket @c/config) (get-guest-home (:ticket @c/config)))
+       (#(get-in % [:body :entry :id]))))
+
+(defn update-node
+  [node-id]
+  (->> (model/map->UpdateNodeBody {:properties {cm/prop-title (.toString (UUID/randomUUID))}})
+       (nodes/update-node (:ticket @c/config) node-id)
+       (#(get-in % [:body :entry :id]))))
+
+(defn- delete-node
+  [node-id]
+  (nodes/delete-node (:ticket @c/config) node-id {:permanent true}))
+
 (defn create-then-delete-node
   [name]
-  (let [ticket (get-in (auth/create-ticket (get-in @config/config [:alfresco :user]) (get-in @config/config [:alfresco :password])) [:body :entry])
-        ;; create a node
-        created-node-id (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
-                             (nodes/create-node ticket (get-guest-home ticket))
-                             (#(get-in % [:body :entry :id])))]
-    ;; delete node
-    (is (= (:status (nodes/delete-node ticket created-node-id {:permanent true})) 204))))
+  (->> (create-node name)
+       (delete-node)))
+
+(defn create-then-update-then-delete-node
+  [name]
+  (->> (create-node name)
+       (update-node)
+       (delete-node)))

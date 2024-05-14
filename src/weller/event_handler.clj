@@ -45,7 +45,9 @@
   ([]
    ;; load config
    (try
-     (reset! c/config (immu/load "resources/config.edn"))
+     (let [config (immu/load "resources/config.edn")]
+       (swap! c/config assoc :activemq (:activemq config))
+       (swap! c/config assoc :alfresco (:alfresco config)))
      (catch Exception e (t/log! :error (.getMessage e))))
    (t/log! :debug @c/config)
 

@@ -21,13 +21,24 @@
             [weller.event-handler :as handler]
             [weller.events :as events]
             [weller.filters :as filters]
+            [weller.fixtures :as fixtures]
             [weller.test-utils :as tu])
   (:import (java.util UUID)))
+
+(use-fixtures :once fixtures/ticket)
 
 (deftest node-created-test
   (let [resource (promise)
         handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-delete-node name)
-    (is (= (:name @resource)) name)
+    (is (= (:name @resource) name))
+    (component/stop handler)))
+
+(deftest node-updated-test
+  (let [resource (promise)
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/is-file?)) #(deliver resource %))
+        name (.toString (UUID/randomUUID))]
+    (tu/create-then-update-then-delete-node name)
+    (is (= (:name @resource) name))
     (component/stop handler)))
