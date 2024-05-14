@@ -22,15 +22,23 @@
             [weller.config :as c])
   (:import (java.util UUID)))
 
-(defn get-guest-home
-  [ticket]
-  (get-in (nodes/get-node ticket "-root-" (model/map->GetNodeQueryParams {:relative-path "/Guest Home"})) [:body :entry :id]))
+(defn- get-guest-home
+  []
+  (get-in (nodes/get-node (:ticket @c/config) "-root-" (model/map->GetNodeQueryParams {:relative-path "/Guest Home"})) [:body :entry :id]))
+
+(defn- create-folder
+  []
+  (->> (model/map->CreateNodeBody {:name (.toString (UUID/randomUUID)) :node-type cm/type-folder})
+       (nodes/create-node (:ticket @c/config) (get-guest-home))
+       (#(get-in % [:body :entry :id]))))
 
 (defn- create-node
-  [name]
-  (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
-       (nodes/create-node (:ticket @c/config) (get-guest-home (:ticket @c/config)))
-       (#(get-in % [:body :entry :id]))))
+  ([name]
+   (create-node name (get-guest-home)))
+  ([name parent-id]
+   (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
+        (nodes/create-node (:ticket @c/config) parent-id)
+        (#(get-in % [:body :entry :id])))))
 
 (defn update-node
   [node-id]
@@ -52,3 +60,19 @@
   (->> (create-node name)
        (update-node)
        (delete-node)))
+
+(defn create-child-assoc
+  []
+  (let [parent-node-id (create-folder)
+        child-node-id (create-node (.toString (UUID/randomUUID)))]
+    (->> [(model/map->CreateSecondaryChildBody {:child-id child-node-id :assoc-type cm/assoc-contains})]
+         (nodes/create-secondary-child (:ticket @c/config) parent-node-id))
+    (delete-node child-node-id)
+    (delete-node parent-node-id)))
+
+(defn create-peer-assoc
+  []
+  (let [created-node-id (create-node (.toString (UUID/randomUUID)))]
+    (->> (model/map->CreateNodeAssocsBody {:target-id created-node-id :assoc-type cm/assoc-contains})
+         (nodes/create-node-assocs (:ticket @c/config) (get-guest-home)))
+    (delete-node created-node-id)))
