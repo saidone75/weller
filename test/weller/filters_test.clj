@@ -19,6 +19,7 @@
             [cral.model.alfresco.cm :as cm]
             [weller.components.component :as component]
             [weller.event-handler :as handler]
+            [weller.events :as events]
             [weller.filters :as filters]
             [weller.fixtures :as fixtures]
             [weller.test-utils :as tu])
@@ -28,7 +29,7 @@
 
 (deftest aspect-added-test
   (let [resource (promise)
-        handler (handler/make-handler (filters/aspect-added? cm/asp-versionable) #(deliver resource %))]
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-added? cm/asp-versionable)) #(deliver resource %))]
     (tu/add-aspect cm/asp-versionable)
     (is (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable)))
     (component/stop handler)))
