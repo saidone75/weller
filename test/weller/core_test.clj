@@ -25,9 +25,9 @@
   (:import (java.util UUID)))
 
 (deftest node-created-test
-  (def resource (promise))
-  (def handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %)))
-  (let [name (.toString (UUID/randomUUID))]
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %))
+        name (.toString (UUID/randomUUID))]
     (tu/create-then-delete-node name)
-    (is (= (:name @resource)) name))
-  (component/stop handler))
+    (is (= (:name @resource)) name)
+    (component/stop handler)))
