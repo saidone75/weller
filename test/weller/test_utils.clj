@@ -1,4 +1,4 @@
-;  weller - Alfresco out-of-process extensions in Clojure
+;  weller
 ;  Copyright (C) 2024 Saidone
 ;
 ;  This program is free software: you can redistribute it and/or modify
@@ -30,8 +30,8 @@
   [name]
   (let [ticket (get-in (auth/create-ticket (get-in @config/config [:alfresco :user]) (get-in @config/config [:alfresco :password])) [:body :entry])
         ;; create a node
-        create-node-response (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
-                                  (nodes/create-node ticket (get-guest-home ticket)))]
-    (is (= (:status create-node-response) 201))
+        created-node-id (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
+                             (nodes/create-node ticket (get-guest-home ticket))
+                             (#(get-in % [:body :entry :id])))]
     ;; delete node
-    (is (= (:status (nodes/delete-node ticket (get-in create-node-response [:body :entry :id]) {:permanent true})) 204))))
+    (is (= (:status (nodes/delete-node ticket created-node-id {:permanent true})) 204))))
