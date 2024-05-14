@@ -73,9 +73,10 @@
     (delete-node child-node-id)
     (delete-node parent-node-id)))
 
-(defn create-peer-assoc
+(defn create-then-delete-peer-assoc
   []
-  (let [created-node-id (create-node (.toString (UUID/randomUUID)))]
+  (let [created-node-id (create-node)]
     (->> (model/map->CreateNodeAssocsBody {:target-id created-node-id :assoc-type cm/assoc-contains})
          (nodes/create-node-assocs (:ticket @c/config) (get-guest-home)))
+    (nodes/delete-node-assocs (:ticket @c/config) (get-guest-home) created-node-id)
     (delete-node created-node-id)))
