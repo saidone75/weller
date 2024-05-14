@@ -1,4 +1,4 @@
-;  weller
+;  Weller is like Alfresco out-of-process extensions but 100% Clojure
 ;  Copyright (C) 2024 Saidone
 ;
 ;  This program is free software: you can redistribute it and/or modify
@@ -19,14 +19,14 @@
             [taoensso.telemere :as t]
             [weller.components.component :as component]))
 
-(def name "MessageHandler")
+(def component-name "MessageHandler")
 
 (defrecord MessageHandler
   [chan f running]
   component/Component
 
   (start [this]
-    (t/log! :info (format "starting %s" name))
+    (t/log! :info (format "starting %s" component-name))
     (let [this (assoc this :running true)]
       (a/go-loop [message (a/<! chan)]
         (f (get-in message [:data :resource]))
@@ -34,7 +34,7 @@
       this))
 
   (stop [this]
-    (t/log! :info (format "stopping %s" name))
+    (t/log! :info (format "stopping %s" component-name))
     (assoc this :running false)))
 
 (defn make-handler [chan f]

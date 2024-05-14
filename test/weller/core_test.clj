@@ -1,4 +1,4 @@
-;  weller
+;  Weller is like Alfresco out-of-process extensions but 100% Clojure
 ;  Copyright (C) 2024 Saidone
 ;
 ;  This program is free software: you can redistribute it and/or modify
@@ -54,6 +54,27 @@
 (deftest child-assoc-created-test
   (let [resource (promise)
         handler (handler/make-handler (filters/event? events/child-assoc-created) #(deliver resource %))]
-    (tu/create-child-assoc)
+    (tu/create-then-delete-child-assoc)
     (is (= ((keyword "@type") @resource) "ChildAssociationResource"))
+    (component/stop handler)))
+
+(deftest child-assoc-deleted-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/child-assoc-deleted) #(deliver resource %))]
+    (tu/create-then-delete-child-assoc)
+    (is (= ((keyword "@type") @resource) "ChildAssociationResource"))
+    (component/stop handler)))
+
+(deftest peer-assoc-created-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/peer-assoc-created) #(deliver resource %))]
+    (tu/create-then-delete-peer-assoc)
+    (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
+    (component/stop handler)))
+
+(deftest peer-assoc-deleted-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/peer-assoc-deleted) #(deliver resource %))]
+    (tu/create-then-delete-peer-assoc)
+    (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
     (component/stop handler)))

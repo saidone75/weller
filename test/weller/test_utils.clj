@@ -1,4 +1,4 @@
-;  weller
+;  Weller is like Alfresco out-of-process extensions but 100% Clojure
 ;  Copyright (C) 2024 Saidone
 ;
 ;  This program is free software: you can redistribute it and/or modify
@@ -33,6 +33,8 @@
        (#(get-in % [:body :entry :id]))))
 
 (defn- create-node
+  ([]
+   (create-node (.toString (UUID/randomUUID))))
   ([name]
    (create-node name (get-guest-home)))
   ([name parent-id]
@@ -61,18 +63,20 @@
        (update-node)
        (delete-node)))
 
-(defn create-child-assoc
+(defn create-then-delete-child-assoc
   []
   (let [parent-node-id (create-folder)
-        child-node-id (create-node (.toString (UUID/randomUUID)))]
+        child-node-id (create-node)]
     (->> [(model/map->CreateSecondaryChildBody {:child-id child-node-id :assoc-type cm/assoc-contains})]
          (nodes/create-secondary-child (:ticket @c/config) parent-node-id))
+    (nodes/delete-secondary-child (:ticket @c/config) parent-node-id child-node-id)
     (delete-node child-node-id)
     (delete-node parent-node-id)))
 
-(defn create-peer-assoc
+(defn create-then-delete-peer-assoc
   []
-  (let [created-node-id (create-node (.toString (UUID/randomUUID)))]
+  (let [created-node-id (create-node)]
     (->> (model/map->CreateNodeAssocsBody {:target-id created-node-id :assoc-type cm/assoc-contains})
          (nodes/create-node-assocs (:ticket @c/config) (get-guest-home)))
+    (nodes/delete-node-assocs (:ticket @c/config) (get-guest-home) created-node-id)
     (delete-node created-node-id)))
