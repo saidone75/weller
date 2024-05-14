@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.core-test
+(ns weller.events-test
   (:require [clojure.test :refer :all]
             [weller.components.component :as component]
             [weller.core :refer :all]
@@ -78,3 +78,6 @@
     (tu/create-then-delete-peer-assoc)
     (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
     (component/stop handler)))
+
+;; enterprise only
+(deftest permission-updated-test)

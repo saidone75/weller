@@ -23,4 +23,5 @@
 (def ^:const child-assoc-deleted "org.alfresco.event.assoc.child.Deleted")
 (def ^:const peer-assoc-created "org.alfresco.event.assoc.peer.Created")
 (def ^:const peer-assoc-deleted "org.alfresco.event.assoc.peer.Deleted")
+;; enterprise only
 (def ^:const permission-updated "org.alfresco.event.permission.Updated")
