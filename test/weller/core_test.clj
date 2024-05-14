@@ -71,3 +71,10 @@
     (tu/create-then-delete-peer-assoc)
     (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
     (component/stop handler)))
+
+(deftest peer-assoc-deleted-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/peer-assoc-deleted) #(deliver resource %))]
+    (tu/create-then-delete-peer-assoc)
+    (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
+    (component/stop handler)))
