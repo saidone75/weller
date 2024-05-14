@@ -42,3 +42,12 @@
     (tu/create-then-update-then-delete-node name)
     (is (= (:name @resource) name))
     (component/stop handler)))
+
+(deftest node-deleted-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/event? events/node-deleted) #(deliver resource %))
+        name (.toString (UUID/randomUUID))]
+    (tu/create-then-update-then-delete-node name)
+    (println @resource)
+    (is (= (:name @resource) name))
+    (component/stop handler)))
