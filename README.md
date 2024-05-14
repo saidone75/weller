@@ -1,32 +1,14 @@
 # weller
-
 Weller is like Alfresco out-of-process extensions but in pure Clojure.
 
-## Installation
-
-Download from http://example.com/FIXME.
+## Outline
+- Lean and readable code
+- 100% pure Clojure
+- 100% test coverage
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar weller-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+COMING SOON
 
 ## License
 Copyright (c) 2024 Saidone

@@ -14,14 +14,21 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.events)
+(ns weller.filters-test
+  (:require [clojure.test :refer :all]
+            [cral.model.alfresco.cm :as cm]
+            [weller.components.component :as component]
+            [weller.event-handler :as handler]
+            [weller.filters :as filters]
+            [weller.fixtures :as fixtures]
+            [weller.test-utils :as tu])
+  (:import (clojure.lang PersistentVector)))
 
-(def ^:const node-created "org.alfresco.event.node.Created")
-(def ^:const node-updated "org.alfresco.event.node.Updated")
-(def ^:const node-deleted "org.alfresco.event.node.Deleted")
-(def ^:const child-assoc-created "org.alfresco.event.assoc.child.Created")
-(def ^:const child-assoc-deleted "org.alfresco.event.assoc.child.Deleted")
-(def ^:const peer-assoc-created "org.alfresco.event.assoc.peer.Created")
-(def ^:const peer-assoc-deleted "org.alfresco.event.assoc.peer.Deleted")
-;; enterprise only
-(def ^:const permission-updated "org.alfresco.event.permission.Updated")
+(use-fixtures :once fixtures/ticket)
+
+(deftest aspect-added-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/aspect-added? cm/asp-versionable) #(deliver resource %))]
+    (tu/add-aspect cm/asp-versionable)
+    (is (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable)))
+    (component/stop handler)))

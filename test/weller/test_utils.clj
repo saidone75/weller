@@ -42,7 +42,7 @@
         (nodes/create-node (:ticket @c/config) parent-id)
         (#(get-in % [:body :entry :id])))))
 
-(defn update-node
+(defn- update-node
   [node-id]
   (->> (model/map->UpdateNodeBody {:properties {cm/prop-title (.toString (UUID/randomUUID))}})
        (nodes/update-node (:ticket @c/config) node-id)
@@ -51,11 +51,6 @@
 (defn- delete-node
   [node-id]
   (nodes/delete-node (:ticket @c/config) node-id {:permanent true}))
-
-(defn create-then-delete-node
-  [name]
-  (->> (create-node name)
-       (delete-node)))
 
 (defn create-then-update-then-delete-node
   [name]
@@ -79,4 +74,12 @@
     (->> (model/map->CreateNodeAssocsBody {:target-id created-node-id :assoc-type cm/assoc-contains})
          (nodes/create-node-assocs (:ticket @c/config) (get-guest-home)))
     (nodes/delete-node-assocs (:ticket @c/config) (get-guest-home) created-node-id)
+    (delete-node created-node-id)))
+
+(defn add-aspect
+  [aspect-name]
+  (let [created-node-id (create-node)
+        aspect-names (get-in (nodes/get-node (:ticket @c/config) created-node-id) [:body :entry :aspect-names])]
+    (->> (model/map->UpdateNodeBody {:aspect-names (conj aspect-names aspect-name)})
+         (nodes/update-node (:ticket @c/config) created-node-id))
     (delete-node created-node-id)))
