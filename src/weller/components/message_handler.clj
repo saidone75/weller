@@ -19,14 +19,14 @@
             [taoensso.telemere :as t]
             [weller.components.component :as component]))
 
-(def name "MessageHandler")
+(def component-name "MessageHandler")
 
 (defrecord MessageHandler
   [chan f running]
   component/Component
 
   (start [this]
-    (t/log! :info (format "starting %s" name))
+    (t/log! :info (format "starting %s" component-name))
     (let [this (assoc this :running true)]
       (a/go-loop [message (a/<! chan)]
         (f (get-in message [:data :resource]))
@@ -34,7 +34,7 @@
       this))
 
   (stop [this]
-    (t/log! :info (format "stopping %s" name))
+    (t/log! :info (format "stopping %s" component-name))
     (assoc this :running false)))
 
 (defn make-handler [chan f]

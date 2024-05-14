@@ -38,7 +38,7 @@
       :taps (doall (map component/stop (:taps this)))
       :listener (component/stop (:listener this)))))
 
-(defn add-tap [this pred f]
+(defn add-filtered-tap [this pred f]
   (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-filtered-tap (:mult this) pred) f))))
 
 (defn make-handler
@@ -58,5 +58,5 @@
                          :mult     (a/mult chan)})))
   ([pred f]
    (-> (make-handler)
-       (add-tap pred f)
+       (add-filtered-tap pred f)
        (component/start))))
