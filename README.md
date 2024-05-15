@@ -12,15 +12,23 @@ Filters can be composed of a single predicate:
 ```clojure
 (filters/event? events/node-updated)
 ```
-or a composition of predicates using `every-pred` (logical AND) or `some-fn` (logical OR) Clojure built-in functions:
+or a composition of predicates using `every-pred` (logical AND) or `some-fn` (logical OR) Clojure built-in functions.
+
+E.g. this matches every updated node which is a file:
 ```clojure
-(every-pred (filters/event? events/node-updated) (filters/is-file?))
+(every-pred (filters/event? events/node-updated)
+            (filters/is-file?))
 ```
+this matches every node with `cm:titled` **OR** `cm:dublincore` aspects (regardless of the event type): 
 ```clojure
-(some-fn (filters/node-aspect? cm/asp-titled) (filters/node-aspect? cm/asp-dublincore))
+(some-fn (filters/node-aspect? cm/asp-titled)
+         (filters/node-aspect? cm/asp-dublincore))
 ```
+and this matches updated nodes with `cm:titled` **OR** `cm:dublincore` aspects:
 ```clojure
-(every-pred (filters/event? events/node-updated) (some-fn (filters/node-aspect? cm/asp-titled) (filters/node-aspect? cm/asp-dublincore)))
+(every-pred (filters/event? events/node-updated)
+            (some-fn (filters/node-aspect? cm/asp-titled)
+                     (filters/node-aspect? cm/asp-dublincore)))
 ```
 ### Create a function
 ...
