@@ -43,14 +43,8 @@
 
 (defn make-handler
   ([]
-   ;; load config
-   (try
-     (let [config (immu/load "resources/config.edn")]
-       (swap! c/config assoc :activemq (:activemq config))
-       (swap! c/config assoc :alfresco (:alfresco config)))
-     (catch Exception e (t/log! :error (.getMessage e))))
-   (t/log! :debug @c/config)
-
+   ;; load configuration
+   (c/configure)
    (let [chan (a/chan)]
      (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
                          :taps     []
