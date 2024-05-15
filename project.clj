@@ -23,7 +23,7 @@
                  [com.stuartsierra/component "1.1.0"]
                  [org.apache.activemq/activemq-broker "6.1.1"]
                  [org.clojure/data.json "2.5.0"]
-                 [org.saidone/cral "0.3.0"]
+                 [org.saidone/cral "0.3.1"]
                  [com.taoensso/telemere "1.0.0-beta9"]
                  [russellwhitaker/immuconf "0.3.0"]
                  [org.clojure/core.async "1.6.681"]]
