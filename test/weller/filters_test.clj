@@ -41,3 +41,10 @@
     (println @resource)
     (is (not (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable))))
     (component/stop handler)))
+
+(deftest assoc-type-test
+  (let [resource (promise)
+        handler (handler/make-handler (filters/assoc-type? cm/assoc-contains) #(deliver resource %))]
+    (tu/create-then-delete-peer-assoc)
+    (is (= (:assoc-type @resource) (name cm/assoc-contains)))
+    (component/stop handler)))
