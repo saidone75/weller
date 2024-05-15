@@ -30,6 +30,14 @@
 (deftest aspect-added-test
   (let [resource (promise)
         handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-added? cm/asp-versionable)) #(deliver resource %))]
-    (tu/add-aspect cm/asp-versionable)
+    (tu/add-then-remove-aspect cm/asp-versionable)
     (is (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable)))
+    (component/stop handler)))
+
+(deftest aspect-removed-test
+  (let [resource (promise)
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-removed? cm/asp-versionable)) #(deliver resource %))]
+    (tu/add-then-remove-aspect cm/asp-versionable)
+    (println @resource)
+    (is (not (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable))))
     (component/stop handler)))

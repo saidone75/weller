@@ -42,9 +42,14 @@
   (aspect-added? cm/asp-versionable)
   ```"
   [aspect]
-  (partial #(and
-              (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) (name aspect))
-              (not (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) (name aspect))))))
+  (partial #(let [aspect (name aspect)
+                  aspects (get-in % [:data :resource :aspect-names])
+                  aspects-before (get-in % [:data :resource-before :aspect-names])]
+              (if-not (or (nil? aspects) (nil? aspects-before))
+                (and
+                  (.contains ^PersistentVector aspects aspect)
+                  (not (.contains ^PersistentVector aspects-before aspect)))
+                false))))
 
 (defn aspect-removed?
   "Return true when `aspect` has been removed from the node.\\
@@ -53,9 +58,14 @@
   (aspect-removed? cm/asp-versionable)
   ```"
   [aspect]
-  (partial #(and
-              (not (.contains ^PersistentVector (get-in % [:data :resource :aspect-names]) aspect))
-              (.contains ^PersistentVector (get-in % [:data :resource-before :aspect-names]) aspect))))
+  (partial #(let [aspect (name aspect)
+                  aspects (get-in % [:data :resource :aspect-names])
+                  aspects-before (get-in % [:data :resource-before :aspect-names])]
+              (if-not (or (nil? aspects) (nil? aspects-before))
+                (and
+                  (not (.contains ^PersistentVector aspects aspect))
+                  (.contains ^PersistentVector aspects-before aspect))
+                false))))
 
 (defn assoc-type?
   "Return true when an event correspond to a specific association type."

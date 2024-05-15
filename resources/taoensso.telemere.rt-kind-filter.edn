@@ -1,1 +1,1 @@
-{:allow [:log]}
+{:allow [:log :trace]}

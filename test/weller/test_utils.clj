@@ -78,10 +78,12 @@
     (nodes/delete-node-assocs (:ticket @c/config) (get-guest-home) created-node-id)
     (delete-node created-node-id)))
 
-(defn add-aspect
+(defn add-then-remove-aspect
   [aspect-name]
   (let [created-node-id (create-node)
         aspect-names (get-in (nodes/get-node (:ticket @c/config) created-node-id) [:body :entry :aspect-names])]
     (->> (model/map->UpdateNodeBody {:aspect-names (conj aspect-names aspect-name)})
+         (nodes/update-node (:ticket @c/config) created-node-id))
+    (->> (model/map->UpdateNodeBody {:aspect-names aspect-names})
          (nodes/update-node (:ticket @c/config) created-node-id))
     (delete-node created-node-id)))
