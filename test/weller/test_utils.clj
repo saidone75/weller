@@ -53,10 +53,12 @@
   (nodes/delete-node (:ticket @c/config) node-id {:permanent true}))
 
 (defn create-then-update-then-delete-node
-  [name]
-  (->> (create-node name)
-       (update-node)
-       (delete-node)))
+  ([]
+   (create-then-update-then-delete-node (.toString (UUID/randomUUID))))
+  ([name]
+   (->> (create-node name)
+        (update-node)
+        (delete-node))))
 
 (defn create-then-delete-child-assoc
   []

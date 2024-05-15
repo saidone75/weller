@@ -14,22 +14,39 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.filters-test
+(ns weller.handler-test
   (:require [clojure.test :refer :all]
-            [cral.model.alfresco.cm :as cm]
+            [cral.api.core.nodes :as nodes]
+            [taoensso.telemere :as t]
             [weller.components.component :as component]
+            [weller.config :as c]
             [weller.event-handler :as handler]
             [weller.events :as events]
             [weller.filters :as filters]
             [weller.fixtures :as fixtures]
-            [weller.test-utils :as tu])
-  (:import (clojure.lang PersistentVector)))
+            [weller.test-utils :as tu]))
 
 (use-fixtures :once fixtures/ticket)
 
-(deftest aspect-added-test
-  (let [resource (promise)
-        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-added? cm/asp-versionable)) #(deliver resource %))]
-    (tu/add-aspect cm/asp-versionable)
-    (is (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable)))
+(def node-name "test node name")
+
+(defn- get-node-name
+  [resource]
+  (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :name]))
+
+(deftest make-handler-test
+  (let [result (promise)
+        handler (handler/make-handler)
+        handler (handler/add-filtered-tap handler (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+    (component/start handler)
+    (tu/create-then-update-then-delete-node node-name)
+    (t/log! @result)
+    (component/stop handler)))
+
+(deftest simple-make-handler-test
+  (let [result (promise)
+        ;; note that handler is started automatically with this constructor
+        handler (handler/make-handler (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+    (tu/create-then-update-then-delete-node node-name)
+    (t/log! @result)
     (component/stop handler)))
