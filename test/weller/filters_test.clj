@@ -28,8 +28,37 @@
 (use-fixtures :once fixtures/ticket)
 
 (deftest aspect-added-test
-  (let [resource (promise)
-        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-added? cm/asp-versionable)) #(deliver resource %))]
-    (tu/add-aspect cm/asp-versionable)
-    (is (.contains ^PersistentVector (:aspect-names @resource) (name cm/asp-versionable)))
+  (let [result (promise)
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-added? cm/asp-versionable)) #(deliver result %))]
+    (tu/add-then-remove-aspect cm/asp-versionable)
+    (is (.contains ^PersistentVector (:aspect-names @result) (name cm/asp-versionable)))
+    (component/stop handler)))
+
+(deftest aspect-removed-test
+  (let [result (promise)
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/aspect-removed? cm/asp-versionable)) #(deliver result %))]
+    (tu/add-then-remove-aspect cm/asp-versionable)
+    (println @result)
+    (is (not (.contains ^PersistentVector (:aspect-names @result) (name cm/asp-versionable))))
+    (component/stop handler)))
+
+(deftest assoc-type-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/assoc-type? cm/assoc-contains) #(deliver result %))]
+    (tu/create-then-delete-peer-assoc)
+    (is (= (:assoc-type @result) (name cm/assoc-contains)))
+    (component/stop handler)))
+
+(deftest content-added-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/content-added?) #(deliver result %))]
+    (tu/create-then-update-then-delete-node)
+    (is (> (get-in @result [:content :size-in-bytes]) 0))
+    (component/stop handler)))
+
+(deftest content-changed-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/content-changed?) #(deliver result %))]
+    (tu/create-then-update-then-delete-node)
+    (not (nil? @result))
     (component/stop handler)))
