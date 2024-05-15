@@ -73,21 +73,36 @@
   (partial #(= (get-in % [:data :resource :assoc-type]) (name assoc-type))))
 
 (defn content-added?
-  ;; TODO
   "Checks if an event represents the addition of content (i.e. a file) to an existing *cm:content* node in the repository."
   []
-  (partial true?))
+  (partial #(let [
+                  content (get-in % [:data :resource :content])
+                  content-before (get-in % [:data :resource-before :content])]
+              (if-not (or (nil? content) (nil? content-before))
+                (and
+                  (= (:size-in-bytes content-before) 0)
+                  (> (:size-in-bytes content) 0))
+                false))))
 
 (defn content-changed?
-  ;; TODO
   "Checks if an event represents a content update (i.e. file updated) of a *cm:content* node in the repository."
   []
-  )
+  (partial #(let [
+                  content (get-in % [:data :resource :content])
+                  content-before (get-in % [:data :resource-before :content])]
+              (if-not (or (nil? content) (nil? content-before))
+                (and
+                  (not (= (:size-in-bytes content-before) 0))
+                  (or
+                    (not (= (:size-in-bytes content) (:size-in-bytes content-before)))
+                    (not (= (:mime-type content) (:mime-type content-before)))
+                    (not (= (:encoding content) (:encoding content-before)))))
+                false))))
 
 (defn is-file?
   "Checks if an event corresponds to a repository node of type *cm:content* or subtype (i.e. a file)."
   []
-  (partial #(= (get-in % [:data :resource :is-file]) true)))
+  )
 
 (defn is-folder?
   "Checks if an event corresponds to a repository node of type *cm:folder* or subtype (i.e. a folder)."

@@ -15,12 +15,19 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.test-utils
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.math :as math]
+            [clojure.test :refer :all]
             [cral.api.core.nodes :as nodes]
             [cral.model.alfresco.cm :as cm]
             [cral.model.core :as model]
             [weller.config :as c])
-  (:import (java.util UUID)))
+  (:import (java.io File)
+           (java.util UUID)))
+
+(defn- gen-str
+  [length]
+  (apply str (take length (repeatedly #(rand-nth (map char (range 65 90)))))))
 
 (defn- get-guest-home
   []
@@ -48,6 +55,14 @@
        (nodes/update-node (:ticket @c/config) node-id)
        (#(get-in % [:body :entry :id]))))
 
+(defn- update-node-content
+  [node-id]
+  (let [file-to-be-uploaded (File/createTempFile "tmp." ".txt")]
+    (spit file-to-be-uploaded (gen-str (rand-int (math/pow 2 16))))
+    (nodes/update-node-content (:ticket @c/config) node-id file-to-be-uploaded)
+    (io/delete-file file-to-be-uploaded)
+    node-id))
+
 (defn- delete-node
   [node-id]
   (nodes/delete-node (:ticket @c/config) node-id {:permanent true}))
@@ -58,6 +73,8 @@
   ([name]
    (->> (create-node name)
         (update-node)
+        (update-node-content)
+        (update-node-content)
         (delete-node))))
 
 (defn create-then-delete-child-assoc

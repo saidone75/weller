@@ -28,55 +28,55 @@
 (use-fixtures :once fixtures/ticket)
 
 (deftest node-created-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/node-created) #(deliver resource %))
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/node-created) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
-    (is (= (:name @resource) name))
+    (is (= (:name @result) name))
     (component/stop handler)))
 
 (deftest node-updated-test
-  (let [resource (promise)
-        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/is-file?)) #(deliver resource %))
+  (let [result (promise)
+        handler (handler/make-handler (every-pred (filters/event? events/node-updated) (filters/is-file?)) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
-    (is (= (:name @resource) name))
+    (is (= (:name @result) name))
     (component/stop handler)))
 
 (deftest node-deleted-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/node-deleted) #(deliver resource %))
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/node-deleted) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
-    (is (= (:name @resource) name))
+    (is (= (:name @result) name))
     (component/stop handler)))
 
 (deftest child-assoc-created-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/child-assoc-created) #(deliver resource %))]
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/child-assoc-created) #(deliver result %))]
     (tu/create-then-delete-child-assoc)
-    (is (= ((keyword "@type") @resource) "ChildAssociationResource"))
+    (is (= ((keyword "@type") @result) "ChildAssociationresult"))
     (component/stop handler)))
 
 (deftest child-assoc-deleted-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/child-assoc-deleted) #(deliver resource %))]
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/child-assoc-deleted) #(deliver result %))]
     (tu/create-then-delete-child-assoc)
-    (is (= ((keyword "@type") @resource) "ChildAssociationResource"))
+    (is (= ((keyword "@type") @result) "ChildAssociationresult"))
     (component/stop handler)))
 
 (deftest peer-assoc-created-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/peer-assoc-created) #(deliver resource %))]
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/peer-assoc-created) #(deliver result %))]
     (tu/create-then-delete-peer-assoc)
-    (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
+    (is (= ((keyword "@type") @result) "PeerAssociationresult"))
     (component/stop handler)))
 
 (deftest peer-assoc-deleted-test
-  (let [resource (promise)
-        handler (handler/make-handler (filters/event? events/peer-assoc-deleted) #(deliver resource %))]
+  (let [result (promise)
+        handler (handler/make-handler (filters/event? events/peer-assoc-deleted) #(deliver result %))]
     (tu/create-then-delete-peer-assoc)
-    (is (= ((keyword "@type") @resource) "PeerAssociationResource"))
+    (is (= ((keyword "@type") @result) "PeerAssociationresult"))
     (component/stop handler)))
 
 ;; enterprise only
