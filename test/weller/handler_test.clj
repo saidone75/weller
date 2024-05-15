@@ -50,3 +50,9 @@
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
     (component/stop handler)))
+
+(deftest simple-make-handler-double-start-double-stop-test
+  (let [handler (handler/make-handler (filters/event? events/node-created) nil)
+        handler (component/start handler)
+        handler (component/stop handler)]
+    (component/stop handler)))

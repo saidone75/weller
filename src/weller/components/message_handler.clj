@@ -26,16 +26,28 @@
   component/Component
 
   (start [this]
-    (t/log! :info (format "starting %s" component-name))
-    (let [this (assoc this :running true)]
-      (a/go-loop [message (a/<! chan)]
-        (f (get-in message [:data :resource]))
-        (when (:running this) (recur (a/<! chan))))
-      this))
+    (if running
+      (do
+        (t/log! :warn (format "%s is already running" component-name))
+        this)
+      (do
+        (t/log! :info (format "starting %s" component-name))
+        (let [this (assoc this :running true)]
+          (a/go-loop [message (a/<! chan)]
+            (f (get-in message [:data :resource]))
+            (when (:running this) (recur (a/<! chan))))
+          this))))
 
   (stop [this]
-    (t/log! :info (format "stopping %s" component-name))
-    (assoc this :running false)))
+    (if-not running
+      (do
+        (t/log! :warn (format "%s is not running" component-name))
+        this)
+      (do
+        (t/log! :info (format "stopping %s" component-name))
+        (assoc this :running false)))))
 
 (defn make-handler [chan f]
-  (map->MessageHandler {:chan chan :f f}))
+  (map->MessageHandler {:chan    chan
+                        :f       f
+                        :running false}))

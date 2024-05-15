@@ -16,27 +16,38 @@
 
 (ns weller.event-handler
   (:require [clojure.core.async :as a]
-            [immuconf.config :as immu]
             [taoensso.telemere :as t]
-            [weller.components.activemq :as activemq]
+            [weller.components.activemq-listener :as activemq]
             [weller.components.component :as component]
             [weller.components.message-handler :as mh]
             [weller.config :as c]
             [weller.filters :as filters]))
 
+(def component-name "Event handler")
+
 (defrecord EventHandler
-  [listener taps chan mult]
+  [listener taps chan mult running]
   component/Component
 
   (start [this]
-    (assoc this
-      :listener (component/start (:listener this))
-      :taps (doall (map component/start (:taps this)))))
+    (if running
+      (do
+        (t/log! :warn (format "%s is already running" component-name))
+        this)
+      (assoc this
+        :listener (component/start (:listener this))
+        :taps (doall (map component/start (:taps this)))
+        :running true)))
 
   (stop [this]
-    (assoc this
-      :taps (doall (map component/stop (:taps this)))
-      :listener (component/stop (:listener this)))))
+    (if-not running
+      (do
+        (t/log! :warn (format "%s is not running" component-name))
+        this)
+      (assoc this
+        :taps (doall (map component/stop (:taps this)))
+        :listener (component/stop (:listener this))
+        :running false))))
 
 (defn add-filtered-tap [this pred f]
   (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-filtered-tap (:mult this) pred) f))))
@@ -49,7 +60,8 @@
      (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
                          :taps     []
                          :chan     chan
-                         :mult     (a/mult chan)})))
+                         :mult     (a/mult chan)
+                         :running  false})))
   ([pred f]
    (-> (make-handler)
        (add-filtered-tap pred f)
