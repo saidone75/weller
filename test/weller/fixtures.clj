@@ -15,21 +15,15 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.fixtures
-  (:require [clojure.java.io :as io]
-            [clojure.test :refer :all]
-            [weller.config :as c]
-            [immuconf.config :as immu]
+  (:require [clojure.test :refer :all]
             [cral.api.auth :as auth]
-            [taoensso.telemere :as t]))
-
-(def config-file "resources/config.edn")
+            [weller.config :as c]))
 
 (defn ticket [f]
-  (if (.exists (io/file config-file))
-    ;; load configuration
-    (let [config (immu/load config-file)]
-      (reset! c/config config)
-      (cral.config/configure (:alfresco config))
-      (swap! c/config assoc :ticket (get-in (auth/create-ticket (get-in config [:alfresco :user]) (get-in config [:alfresco :password])) [:body :entry])))
-    (t/log! :warn (format "unable to find %s, using defaults" config-file)))
+  ;; load configuration
+  (c/configure)
+  ;; configure CRAL
+  (cral.config/configure (:alfresco @c/config))
+  ;; put an Alfresco ticket in config atom for tests
+  (swap! c/config assoc :ticket (get-in (auth/create-ticket (get-in @c/config [:alfresco :user]) (get-in @c/config [:alfresco :password])) [:body :entry]))
   (f))

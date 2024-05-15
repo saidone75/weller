@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.components.activemq
+(ns weller.components.activemq-listener
   (:require [clojure.core.async :as a]
             [clojure.data.json :as json]
             [cral.utils.utils :as cu]
@@ -25,7 +25,7 @@
 
 (def component-name "ActiveMQ listener")
 
-(defrecord Listener
+(defrecord ActiveMqListener
   [config connection chan]
   component/Component
 
@@ -60,4 +60,4 @@
         (assoc this :connection nil)))))
 
 (defn make-listener [config chan]
-  (map->Listener {:config config :chan chan}))
+  (map->ActiveMqListener {:config config :chan chan}))
