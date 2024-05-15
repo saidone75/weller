@@ -42,3 +42,11 @@
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
     (component/stop handler)))
+
+(deftest simple-make-handler-test
+  (let [result (promise)
+        ;; note that handler is started automatically with this constructor
+        handler (handler/make-handler (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+    (tu/create-then-update-then-delete-node node-name)
+    (t/log! @result)
+    (component/stop handler)))
