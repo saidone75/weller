@@ -32,7 +32,9 @@
   (start [this]
     (t/log! :info (format "starting %s" component-name))
     (if connection
-      this
+      (do
+        (t/log! :warn (format "%s is already running" component-name))
+        this)
       (let [connection-factory (new ActiveMQConnectionFactory)
             _ (. connection-factory (setBrokerURL (format "failover:(%s://%s:%d)" (:scheme config) (:host config) (:port config))))
             ^ActiveMQConnection connection (.createConnection connection-factory)
@@ -51,7 +53,9 @@
   (stop [this]
     (t/log! :info (format "stopping %s" component-name))
     (if-not connection
-      this
+      (do
+        (t/log! :warn (format "%s is not running" component-name))
+        this)
       (do
         (try
           (.close connection)
@@ -60,4 +64,6 @@
         (assoc this :connection nil)))))
 
 (defn make-listener [config chan]
-  (map->ActiveMqListener {:config config :chan chan}))
+  (map->ActiveMqListener {:config     config
+                          :connection nil
+                          :chan       chan}))
