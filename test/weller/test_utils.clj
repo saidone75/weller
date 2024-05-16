@@ -93,6 +93,13 @@
          (nodes/update-node (:ticket @c/config) created-node-id))
     (delete-node created-node-id)))
 
+(defn add-property
+  [prop value]
+  (let [created-node-id (create-node)]
+    (->> (model/map->UpdateNodeBody {:properties {prop value}})
+         (nodes/update-node (:ticket @c/config) created-node-id))
+    (delete-node created-node-id)))
+
 (defn create-then-delete-child-assoc
   []
   (let [parent-node-id (create-folder)
