@@ -25,6 +25,10 @@
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
+(defn- is-node-resource?
+  [resource]
+  (= ((keyword "@type") resource) "NodeResource"))
+
 (defn event?
   "Checks if message type is `event`.\\
   Example:
@@ -121,7 +125,7 @@
   [aspect]
   (partial #(let [resource (get-in % [:data :resource])]
               (and
-                (= ((keyword "@type") resource) "NodeResource")
+                (is-node-resource? resource)
                 (and (not (nil? (:aspect-names resource))) (.contains ^PersistentVector (:aspect-names resource) (name aspect)))))))
 
 (defn node-moved?
@@ -129,14 +133,17 @@
   []
   (partial #(let [resource-before (get-in % [:data :resource-before])]
               (and
-                (= ((keyword "@type") resource-before) "NodeResource")
+                (is-node-resource? resource-before)
                 (not (empty? (:primary-hierarchy resource-before)))))))
 
 (defn node-type-changed?
-  ;; TODO
   "Checks if an event represents the change of the type of a node in the repository."
   []
-  )
+  (partial #(let [type (get-in % [:data :resource :node-type])
+                  type-before (get-in % [:data :resource-before :node-type])]
+              (and
+                (not (nil? type-before))
+                (not (= type type-before))))))
 
 (defn node-type?
   ;; TODO
