@@ -62,3 +62,10 @@
     (tu/create-then-update-then-delete-node)
     (not (nil? @result))
     (component/stop handler)))
+
+(deftest mime-type-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/mime-type? "text/plain") #(deliver result %))]
+    (tu/create-then-update-then-delete-node)
+    (is (= (get-in @result [:content :mime-type]) "text/plain"))
+    (component/stop handler)))
