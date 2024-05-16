@@ -19,12 +19,12 @@ E.g. this matches every updated node which is a file:
 (every-pred (filters/event? events/node-updated)
             (filters/is-file?))
 ```
-this matches every node with `cm:titled` **OR** `cm:dublincore` aspects (regardless of the event type): 
+this matches every node with `cm:titled` **or** `cm:dublincore` aspects (regardless of the event type): 
 ```clojure
 (some-fn (filters/node-aspect? cm/asp-titled)
          (filters/node-aspect? cm/asp-dublincore))
 ```
-and this matches updated nodes with `cm:titled` **OR** `cm:dublincore` aspects:
+and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
 ```clojure
 (every-pred (filters/event? events/node-updated)
             (some-fn (filters/node-aspect? cm/asp-titled)
