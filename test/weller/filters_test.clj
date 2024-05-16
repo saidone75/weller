@@ -15,8 +15,7 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.filters-test
-  (:require [clojure.string :as str]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [cral.model.alfresco.cm :as cm]
             [weller.components.component :as component]
             [weller.event-handler :as handler]
@@ -24,7 +23,8 @@
             [weller.filters :as filters]
             [weller.fixtures :as fixtures]
             [weller.test-utils :as tu])
-  (:import (clojure.lang PersistentVector)))
+  (:import (clojure.lang PersistentVector)
+           (java.util UUID)))
 
 (use-fixtures :once fixtures/ticket)
 
@@ -125,4 +125,12 @@
         handler (handler/make-handler (filters/property-changed? cm/prop-publisher) #(deliver result %))]
     (tu/change-property (name cm/prop-publisher))
     (is (contains? (:properties @result) cm/prop-publisher))
+    (component/stop handler)))
+
+(deftest property-current-value-test
+  (let [result (promise)
+        value (.toString (UUID/randomUUID))
+        handler (handler/make-handler (filters/property-current-value? cm/prop-publisher value) #(deliver result %))]
+    (tu/add-property (name cm/prop-publisher) value)
+    (is (= (get-in @result [:properties cm/prop-publisher]) value))
     (component/stop handler)))

@@ -15,8 +15,7 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.filters
-  (:require [clojure.core.async :as a]
-            [cral.model.alfresco.cm :as cm])
+  (:require [clojure.core.async :as a])
   (:import (clojure.lang PersistentVector)))
 
 (defn make-filtered-tap
@@ -175,10 +174,9 @@
                 false))))
 
 (defn property-current-value?
-  ;; TODO
   "Checks if an event represents a node with a specific property with a specific current value."
-  []
-  )
+  [prop value]
+  (partial #(= (get (get-in % [:data :resource :properties]) prop) value)))
 
 (defn property-removed?
   ;; TODO
