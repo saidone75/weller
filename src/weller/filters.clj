@@ -146,10 +146,9 @@
                 (not (= type type-before))))))
 
 (defn node-type?
-  ;; TODO
   "Checks if an event represents a node with a specific type."
-  []
-  )
+  [type]
+  (partial #(= (get-in % [:data :resource :node-type]) (name type))))
 
 (defn property-added?
   ;; TODO

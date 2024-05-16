@@ -101,6 +101,13 @@
 (deftest node-type-changed-test
   (let [result (promise)
         handler (handler/make-handler (filters/node-type-changed?) #(deliver result %))]
-    (tu/change-type)
-    (println @result)
+    (tu/change-type cm/type-savedquery)
+    (is (= (:node-type @result) (name cm/type-savedquery)))
+    (component/stop handler)))
+
+(deftest node-type-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/node-type? cm/type-savedquery) #(deliver result %))]
+    (tu/change-type cm/type-savedquery)
+    (is (= (:node-type @result) (name cm/type-savedquery)))
     (component/stop handler)))
