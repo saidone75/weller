@@ -94,11 +94,13 @@
     (delete-node created-node-id)))
 
 (defn add-property
-  [prop]
-  (let [created-node-id (create-node)]
-    (->> (model/map->UpdateNodeBody {:properties {prop (.toString (UUID/randomUUID))}})
-         (nodes/update-node (:ticket @c/config) created-node-id))
-    (delete-node created-node-id)))
+  ([prop]
+   (add-property prop (.toString (UUID/randomUUID))))
+  ([prop value]
+   (let [created-node-id (create-node)]
+     (->> (model/map->UpdateNodeBody {:properties {prop value}})
+          (nodes/update-node (:ticket @c/config) created-node-id))
+     (delete-node created-node-id))))
 
 (defn change-property
   [prop]
