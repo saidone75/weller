@@ -1,4 +1,4 @@
-;  Weller is like Alfresco out-of-process extensions but 100% Clojure
+;  Weller is like Alfresco out-of-process extensions but in Clojure
 ;  Copyright (C) 2024 Saidone
 ;
 ;  This program is free software: you can redistribute it and/or modify
