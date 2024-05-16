@@ -83,3 +83,17 @@
     (tu/create-then-update-then-delete-node)
     (is (= (get-in @result [:content :mime-type]) "text/plain"))
     (component/stop handler)))
+
+(deftest node-aspect-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/node-aspect? cm/asp-versionable) #(deliver result %))]
+    (tu/add-then-remove-aspect cm/asp-versionable)
+    (is (.contains ^PersistentVector (:aspect-names @result) (name cm/asp-versionable)))
+    (component/stop handler)))
+
+(deftest node-moved-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/node-moved?) #(deliver result %))]
+    (tu/create-then-move-node)
+    (println @result)
+    (component/stop handler)))

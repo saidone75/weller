@@ -125,10 +125,12 @@
                 (and (not (nil? (:aspect-names resource))) (.contains ^PersistentVector (:aspect-names resource) (name aspect)))))))
 
 (defn node-moved?
-  ;; TODO
   "Checks if an event represents a node being moved in the repository."
   []
-  )
+  (partial #(let [resource-before (get-in % [:data :resource-before])]
+              (and
+                (= ((keyword "@type") resource-before) "NodeResource")
+                (not (empty? (:primary-hierarchy resource-before)))))))
 
 (defn node-type-changed?
   ;; TODO
