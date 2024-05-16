@@ -63,6 +63,13 @@
     (not (nil? @result))
     (component/stop handler)))
 
+(deftest is-file-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/is-file?) #(deliver result %))]
+    (tu/create-then-update-then-delete-node)
+    (is (:is-file @result))
+    (component/stop handler)))
+
 (deftest mime-type-test
   (let [result (promise)
         handler (handler/make-handler (filters/mime-type? "text/plain") #(deliver result %))]

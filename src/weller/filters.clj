@@ -101,7 +101,7 @@
 (defn is-file?
   "Checks if an event corresponds to a repository node of type *cm:content* or subtype (i.e. a file)."
   []
-  )
+  (partial #(:is-file (get-in % [:data :resource]))))
 
 (defn is-folder?
   "Checks if an event corresponds to a repository node of type *cm:folder* or subtype (i.e. a folder)."
