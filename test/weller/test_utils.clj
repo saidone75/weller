@@ -77,6 +77,15 @@
         (update-node-content)
         (delete-node))))
 
+(defn create-then-move-node
+  []
+  (let [node-id (create-node)
+        folder-id (create-folder)]
+    (->> (model/map->MoveNodeBody {:target-parent-id folder-id})
+         (nodes/move-node (:ticket @c/config) node-id))
+    (delete-node node-id)
+    (delete-node folder-id)))
+
 (defn create-then-delete-child-assoc
   []
   (let [parent-node-id (create-folder)
