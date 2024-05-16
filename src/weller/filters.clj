@@ -87,8 +87,7 @@
 (defn content-changed?
   "Checks if an event represents a content update (i.e. file updated) of a *cm:content* node in the repository."
   []
-  (partial #(let [
-                  content (get-in % [:data :resource :content])
+  (partial #(let [content (get-in % [:data :resource :content])
                   content-before (get-in % [:data :resource-before :content])]
               (if-not (or (nil? content) (nil? content-before))
                 (and
@@ -114,7 +113,7 @@
   [mime-type]
   (partial #(let [resource (get-in % [:data :resource])]
               (and
-                (= (:node-type resource) (name cm/type-content))
+                (:is-file resource)
                 (= (get-in resource [:content :mime-type]) mime-type)))))
 
 (defn node-aspect?
