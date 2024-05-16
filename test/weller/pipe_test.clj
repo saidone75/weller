@@ -31,8 +31,8 @@
 (def node-name "test node name")
 
 (defn- get-node-name
-  [result]
-  (get-in (nodes/get-node (:ticket @c/config) (:id result)) [:body :entry :name]))
+  [resource]
+  (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :name]))
 
 (deftest make-pipe-test
   (let [result (promise)

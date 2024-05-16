@@ -8,6 +8,10 @@ Weller is like Alfresco out-of-process extensions but in Clojure.
 
 ## Usage
 ### Create and compose filters
+Filters are used for selecting messages that will flow through a tap. Filtering can discriminate the message by matching
+several conditions (e.g. a node has been created or deleted, an aspect has been added to a node, a property changed its
+value, etc.).
+
 Filters can be composed of a single predicate:
 ```clojure
 (filters/event? events/node-updated)
@@ -31,9 +35,25 @@ and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
                      (filters/node-aspect? cm/asp-dublincore)))
 ```
 ### Create a function
-...
-### Build and start an event handler
+A (processing) function is the piece of code deputed to take the (resource part of) message and do something with it.
+The (node) resource is a map representing (usually) a node in Alfresco.
 
+A simple function that prints the node name could be:
+```clojure
+(defn print-node-name
+  [resource]
+  (println (:name resource)))
+```
+### Build and start a message pipe
+```clojure
+(-> (pipe/make-pipe)
+    (pipe/add-tap (filters/event? events/node-created) process-created-node)
+    (pipe/add-tap (filters/event? events/node-deleted) process-deleted-node)
+    (component/start))
+```
+```clojure
+(pipe/make-pipe (filters/event? events/node-created) process-created-node)
+```
 ...
 ## License
 Copyright (c) 2024 Saidone
