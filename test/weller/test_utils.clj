@@ -87,9 +87,16 @@
     (delete-node folder-id)))
 
 (defn change-type
-  []
+  [type]
   (let [created-node-id (create-node)]
-    (->> (model/map->UpdateNodeBody {:node-type cm/type-savedquery})
+    (->> (model/map->UpdateNodeBody {:node-type type})
+         (nodes/update-node (:ticket @c/config) created-node-id))
+    (delete-node created-node-id)))
+
+(defn add-property
+  [prop value]
+  (let [created-node-id (create-node)]
+    (->> (model/map->UpdateNodeBody {:properties {prop value}})
          (nodes/update-node (:ticket @c/config) created-node-id))
     (delete-node created-node-id)))
 

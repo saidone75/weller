@@ -15,7 +15,8 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.filters-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [cral.model.alfresco.cm :as cm]
             [weller.components.component :as component]
             [weller.event-handler :as handler]
@@ -101,6 +102,20 @@
 (deftest node-type-changed-test
   (let [result (promise)
         handler (handler/make-handler (filters/node-type-changed?) #(deliver result %))]
-    (tu/change-type)
-    (println @result)
+    (tu/change-type cm/type-savedquery)
+    (is (= (:node-type @result) (name cm/type-savedquery)))
+    (component/stop handler)))
+
+(deftest node-type-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/node-type? cm/type-savedquery) #(deliver result %))]
+    (tu/change-type cm/type-savedquery)
+    (is (= (:node-type @result) (name cm/type-savedquery)))
+    (component/stop handler)))
+
+(deftest property-added-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/property-added? cm/prop-publisher) #(deliver result %))]
+    (tu/add-property (name cm/prop-publisher) "saidone")
+    (is (contains? (:properties @result) cm/prop-publisher))
     (component/stop handler)))

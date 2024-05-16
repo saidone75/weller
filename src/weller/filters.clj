@@ -146,16 +146,21 @@
                 (not (= type type-before))))))
 
 (defn node-type?
-  ;; TODO
   "Checks if an event represents a node with a specific type."
-  []
-  )
+  [type]
+  (partial #(= (get-in % [:data :resource :node-type]) (name type))))
 
 (defn property-added?
-  ;; TODO
   "Checks if an event corresponds to the addition of a node property in the repository."
-  []
-  )
+  [prop]
+  (partial #(let [properties (get-in % [:data :resource :properties])
+                  properties-before (get-in % [:data :resource-before :properties])]
+              (if-not (or (nil? properties) (nil? properties-before))
+                (and
+                  (or (not (contains? properties-before prop))
+                      (nil? (get prop properties-before)))
+                  (contains? properties prop))
+                false))))
 
 (defn property-changed?
   ;; TODO
