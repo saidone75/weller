@@ -95,5 +95,12 @@
   (let [result (promise)
         handler (handler/make-handler (filters/node-moved?) #(deliver result %))]
     (tu/create-then-move-node)
+    (is (= ((keyword "@type") @result) "NodeResource"))
+    (component/stop handler)))
+
+(deftest node-type-changed-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/node-type-changed?) #(deliver result %))]
+    (tu/change-type)
     (println @result)
     (component/stop handler)))

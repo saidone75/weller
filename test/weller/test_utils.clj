@@ -86,6 +86,13 @@
     (delete-node node-id)
     (delete-node folder-id)))
 
+(defn change-type
+  []
+  (let [created-node-id (create-node)]
+    (->> (model/map->UpdateNodeBody {:node-type cm/type-savedquery})
+         (nodes/update-node (:ticket @c/config) created-node-id))
+    (delete-node created-node-id)))
+
 (defn create-then-delete-child-assoc
   []
   (let [parent-node-id (create-folder)
