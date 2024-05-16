@@ -14,16 +14,16 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.handler-test
+(ns weller.pipe-test
   (:require [clojure.test :refer :all]
             [cral.api.core.nodes :as nodes]
             [taoensso.telemere :as t]
             [weller.components.component :as component]
             [weller.config :as c]
-            [weller.event-handler :as handler]
             [weller.events :as events]
             [weller.filters :as filters]
             [weller.fixtures :as fixtures]
+            [weller.pipe :as pipe]
             [weller.test-utils :as tu]))
 
 (use-fixtures :once fixtures/ticket)
@@ -34,25 +34,25 @@
   [result]
   (get-in (nodes/get-node (:ticket @c/config) (:id result)) [:body :entry :name]))
 
-(deftest make-handler-test
+(deftest make-pipe-test
   (let [result (promise)
-        handler (handler/make-handler)
-        handler (handler/add-filtered-tap handler (filters/event? events/node-created) #(deliver result (get-node-name %)))]
-    (component/start handler)
+        pipe (pipe/make-pipe)
+        pipe (pipe/add-tap pipe (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+    (component/start pipe)
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
-    (component/stop handler)))
+    (component/stop pipe)))
 
-(deftest simple-make-handler-test
+(deftest simple-make-pipe-test
   (let [result (promise)
-        ;; note that handler is started automatically with this constructor
-        handler (handler/make-handler (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+        ;; note that pipe is started automatically with this constructor
+        pipe (pipe/make-pipe (filters/event? events/node-created) #(deliver result (get-node-name %)))]
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
-    (component/stop handler)))
+    (component/stop pipe)))
 
-(deftest simple-make-handler-double-start-double-stop-test
-  (let [handler (handler/make-handler (filters/event? events/node-created) nil)
-        handler (component/start handler)
-        handler (component/stop handler)]
-    (component/stop handler)))
+(deftest simple-make-pipe-double-start-double-stop-test
+  (let [pipe (pipe/make-pipe (filters/event? events/node-created) nil)
+        pipe (component/start pipe)
+        pipe (component/stop pipe)]
+    (component/stop pipe)))

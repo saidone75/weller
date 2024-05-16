@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.event-handler
+(ns weller.pipe
   (:require [clojure.core.async :as a]
             [taoensso.telemere :as t]
             [weller.components.activemq-listener :as activemq]
@@ -23,9 +23,9 @@
             [weller.config :as c]
             [weller.filters :as filters]))
 
-(def component-name "Event handler")
+(def component-name "Pipe")
 
-(defrecord EventHandler
+(defrecord Pipe
   [listener taps chan mult running]
   component/Component
 
@@ -49,20 +49,20 @@
         :listener (component/stop (:listener this))
         :running false))))
 
-(defn add-filtered-tap [this pred f]
-  (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-filtered-tap (:mult this) pred) f))))
+(defn add-tap [this pred f]
+  (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-tap (:mult this) pred) f))))
 
-(defn make-handler
+(defn make-pipe
   ([]
    ;; load configuration
    (c/configure)
    (let [chan (a/chan)]
-     (map->EventHandler {:listener (activemq/make-listener (:activemq @c/config) chan)
-                         :taps     []
-                         :chan     chan
-                         :mult     (a/mult chan)
-                         :running  false})))
+     (map->Pipe {:listener        (activemq/make-listener (:activemq @c/config) chan)
+                         :taps    []
+                         :chan    chan
+                         :mult    (a/mult chan)
+                         :running false})))
   ([pred f]
-   (-> (make-handler)
-       (add-filtered-tap pred f)
+   (-> (make-pipe)
+       (add-tap pred f)
        (component/start))))
