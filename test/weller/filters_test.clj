@@ -116,6 +116,13 @@
 (deftest property-added-test
   (let [result (promise)
         handler (handler/make-handler (filters/property-added? cm/prop-publisher) #(deliver result %))]
-    (tu/add-property (name cm/prop-publisher) "saidone")
+    (tu/add-property cm/prop-publisher)
+    (is (contains? (:properties @result) cm/prop-publisher))
+    (component/stop handler)))
+
+(deftest property-changed-test
+  (let [result (promise)
+        handler (handler/make-handler (filters/property-changed? cm/prop-publisher) #(deliver result %))]
+    (tu/change-property (name cm/prop-publisher))
     (is (contains? (:properties @result) cm/prop-publisher))
     (component/stop handler)))

@@ -163,10 +163,16 @@
                 false))))
 
 (defn property-changed?
-  ;; TODO
   "Checks if an event corresponds to the update of a node property in the repository."
-  []
-  )
+  [prop]
+  (partial #(let [properties (get-in % [:data :resource :properties])
+                  properties-before (get-in % [:data :resource-before :properties])]
+              (if-not (or (nil? properties) (nil? properties-before))
+                (and
+                  (not (nil? (get properties-before prop)))
+                  (not (nil? (get properties prop)))
+                  (not (= (get properties-before prop) (get properties prop))))
+                false))))
 
 (defn property-current-value?
   ;; TODO
