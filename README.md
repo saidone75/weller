@@ -1,5 +1,5 @@
 # weller
-Weller is like Alfresco out-of-process extensions but 100% Clojure.
+Weller is like Alfresco out-of-process extensions but in Clojure.
 
 ## Outline
 - Lean and readable code
