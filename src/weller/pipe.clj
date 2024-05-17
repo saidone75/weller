@@ -49,7 +49,7 @@
         :listener (component/stop (:listener this))
         :running false))))
 
-(defn add-tap [this pred f]
+(defn add-filtered-tap [this pred f]
   (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-tap (:mult this) pred) f))))
 
 (defn make-pipe
@@ -64,5 +64,5 @@
                          :running false})))
   ([pred f]
    (-> (make-pipe)
-       (add-tap pred f)
+       (add-filtered-tap pred f)
        (component/start))))

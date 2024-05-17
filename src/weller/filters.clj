@@ -179,16 +179,24 @@
   (partial #(= (get (get-in % [:data :resource :properties]) prop) value)))
 
 (defn property-removed?
-  ;; TODO
   "Checks if an event corresponds to the removal of a specific property to a node in the repository."
-  []
-  )
+  [prop]
+  (partial #(let [properties (get-in % [:data :resource :properties])
+                  properties-before (get-in % [:data :resource-before :properties])]
+              (if-not (or (nil? properties) (nil? properties-before))
+                (and
+                  (or (not (contains? properties prop))
+                      (nil? (get properties prop)))
+                  (contains? properties-before prop))
+                false))))
 
 (defn property-previous-value?
-  ;; TODO
   "Checks if an event represents a node with a specific property with a specific previous value."
-  []
-  )
+  [prop value]
+  (partial #(let [properties-before (get-in % [:data :resource-before :properties])]
+              (if-not (nil? properties-before)
+                (= (get properties-before prop) value)
+                false))))
 
 (defn property-value?
   ;; TODO

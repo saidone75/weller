@@ -49,7 +49,7 @@ services:
       - "8000:8000"
       - "8080:8080"
     volumes:
-      - cral-acs-volume:/usr/local/tomcat/alf_data
+      - weller-acs-volume:/usr/local/tomcat/alf_data
   share:
     image: ${SHARE_IMAGE}:${SHARE_VERSION}
     mem_limit: 512m
@@ -69,7 +69,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - cral-db-volume:/var/lib/postgresql/data
+      - weller-db-volume:/var/lib/postgresql/data
   solr6:
     image: ${ASS_IMAGE}:${ASS_VERSION}
     mem_limit: 1g
@@ -91,7 +91,7 @@ services:
     ports:
       - "8083:8983" # Browser port
     volumes:
-      - cral-ass-volume:/opt/alfresco-search-services/data
+      - weller-ass-volume:/opt/alfresco-search-services/data
   activemq:
     image: ${ACTIVEMQ_IMAGE}:${ACTIVEMQ_VERSION}
     ports:
@@ -100,9 +100,9 @@ services:
       - 61616:61616 # OpenWire
       - 61613:61613 # STOMP
 volumes:
-  cral-acs-volume:
+  weller-acs-volume:
     external: true
-  cral-db-volume:
+  weller-db-volume:
     external: true
-  cral-ass-volume:
+  weller-ass-volume:
     external: true
