@@ -37,7 +37,7 @@
 (deftest make-pipe-test
   (let [result (promise)
         pipe (pipe/make-pipe)
-        pipe (pipe/add-tap pipe (filters/event? events/node-created) #(deliver result (get-node-name %)))]
+        pipe (pipe/add-filtered-tap pipe (filters/event? events/node-created) #(deliver result (get-node-name %)))]
     (component/start pipe)
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)

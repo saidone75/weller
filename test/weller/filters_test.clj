@@ -139,5 +139,5 @@
   (let [result (promise)
         pipe (pipe/make-pipe (filters/property-removed? cm/prop-publisher) #(deliver result %))]
     (tu/add-then-remove-property (name cm/prop-publisher))
-    (println @result)
+    (is (nil? (get-in @result [:properties cm/prop-publisher])))
     (component/stop pipe)))

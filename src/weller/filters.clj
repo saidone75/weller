@@ -186,7 +186,7 @@
               (if-not (or (nil? properties) (nil? properties-before))
                 (and
                   (or (not (contains? properties prop))
-                      (nil? (get prop properties)))
+                      (nil? (get properties prop)))
                   (contains? properties-before prop))
                 false))))
 
