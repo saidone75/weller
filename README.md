@@ -59,7 +59,6 @@ pipe started automatically:
 ```clojure
 (pipe/make-pipe (filters/event? events/node-created) process-created-node)
 ```
-...
 ## License
 Copyright (c) 2024 Saidone
 
