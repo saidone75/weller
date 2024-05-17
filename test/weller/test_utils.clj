@@ -105,13 +105,15 @@
      (delete-node created-node-id))))
 
 (defn change-property
-  [prop]
-  (let [created-node-id (create-node)]
-    (->> (model/map->UpdateNodeBody {:properties {prop (.toString (UUID/randomUUID))}})
-         (nodes/update-node (:ticket @c/config) created-node-id))
-    (->> (model/map->UpdateNodeBody {:properties {prop (.toString (UUID/randomUUID))}})
-         (nodes/update-node (:ticket @c/config) created-node-id))
-    (delete-node created-node-id)))
+  ([prop]
+   (change-property prop (.toString (UUID/randomUUID))))
+  ([prop initial-value]
+   (let [created-node-id (create-node)]
+     (->> (model/map->UpdateNodeBody {:properties {prop initial-value}})
+          (nodes/update-node (:ticket @c/config) created-node-id))
+     (->> (model/map->UpdateNodeBody {:properties {prop (.toString (UUID/randomUUID))}})
+          (nodes/update-node (:ticket @c/config) created-node-id))
+     (delete-node created-node-id))))
 
 (defn create-then-delete-child-assoc
   []

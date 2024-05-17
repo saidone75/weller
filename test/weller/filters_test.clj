@@ -123,7 +123,7 @@
 (deftest property-changed-test
   (let [result (promise)
         pipe (pipe/make-pipe (filters/property-changed? cm/prop-publisher) #(deliver result %))]
-    (tu/change-property (name cm/prop-publisher))
+    (tu/change-property cm/prop-publisher)
     (is (contains? (:properties @result) cm/prop-publisher))
     (component/stop pipe)))
 
@@ -131,13 +131,21 @@
   (let [result (promise)
         value (.toString (UUID/randomUUID))
         pipe (pipe/make-pipe (filters/property-current-value? cm/prop-publisher value) #(deliver result %))]
-    (tu/add-then-remove-property (name cm/prop-publisher) value)
+    (tu/add-then-remove-property cm/prop-publisher value)
     (is (= (get-in @result [:properties cm/prop-publisher]) value))
     (component/stop pipe)))
 
 (deftest property-removed-test
   (let [result (promise)
         pipe (pipe/make-pipe (filters/property-removed? cm/prop-publisher) #(deliver result %))]
-    (tu/add-then-remove-property (name cm/prop-publisher))
+    (tu/add-then-remove-property cm/prop-publisher)
     (is (nil? (get-in @result [:properties cm/prop-publisher])))
+    (component/stop pipe)))
+
+(deftest property-previous-value-test
+  (let [result (promise)
+        value (.toString (UUID/randomUUID))
+        pipe (pipe/make-pipe (filters/property-previous-value? cm/prop-publisher value) #(deliver result %))]
+    (tu/change-property cm/prop-publisher value)
+    @result
     (component/stop pipe)))

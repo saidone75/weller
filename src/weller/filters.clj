@@ -191,10 +191,12 @@
                 false))))
 
 (defn property-previous-value?
-  ;; TODO
   "Checks if an event represents a node with a specific property with a specific previous value."
-  []
-  )
+  [prop value]
+  (partial #(let [properties-before (get-in % [:data :resource-before :properties])]
+              (if-not (nil? properties-before)
+                (= (get properties-before prop) value)
+                false))))
 
 (defn property-value?
   ;; TODO
