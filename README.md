@@ -78,8 +78,9 @@ this case):
 ```
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receive all ActiveMQ messages. Then at least one tap must
-be connected using the function `add-tap` that takes a filter and a (processing) function as arguments. Finally the pipe
-can be started manually by calling `component/start` on it.
+be connected using the function `add-tap` that takes a filter and a (processing) function as arguments (note that in
+Clojure functions are first-class and can be passed-to or returned-from other functions). Finally the pipe can be
+started manually by calling `component/start` on it.
 ```clojure
 (-> (pipe/make-pipe)
     (pipe/add-tap (pred/event? events/node-created) process-created-node)
