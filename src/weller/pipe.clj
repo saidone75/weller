@@ -53,6 +53,8 @@
   (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-tap (:mult this) pred) f))))
 
 (defn make-pipe
+  "Creates a pipe with a built-in ActiveMQ listener.
+  If a predicate `pred` and a function `f` are provided, then also add a filtered tap to it and start the pipe."
   ([]
    ;; load configuration
    (c/configure)
