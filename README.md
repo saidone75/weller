@@ -7,7 +7,7 @@ Weller is like Alfresco out-of-process extensions but in Clojure.
 - 100% test coverage
 
 ## Usage
-### Create and compose filters
+### Create filters by composing predicates
 Filters are used for selecting messages that will flow through a tap. Filters can discriminate the message by matching
 several conditions (e.g. a node that has been created or deleted, an aspect that has been added to a node, a property
 that changed its value, etc.).
@@ -34,7 +34,7 @@ and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
             (some-fn (filters/node-aspect? cm/asp-titled)
                      (filters/node-aspect? cm/asp-dublincore)))
 ```
-The built-in filters are declared [here](src/weller/filters.clj) and the events [here](src/weller/events.clj).
+The built-in predicates are declared [here](src/weller/filters.clj) while the events [here](src/weller/events.clj).
 ### Create a function
 A (processing) function is the piece of code deputed to take the (the resource part of) message and do something with it.
 The (node) resource is a map representing (usually) a node in Alfresco.
