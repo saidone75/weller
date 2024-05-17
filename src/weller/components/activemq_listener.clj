@@ -63,7 +63,9 @@
             (t/log! :warn (format "error while stopping " component-name))))
         (assoc this :connection nil)))))
 
-(defn make-listener [config chan]
+(defn make-listener
+  "Creates an ActiveMQ listener with configuration data specified in `config`, received messages will be put in `chan`."
+  [config chan]
   (map->ActiveMqListener {:config     config
                           :connection nil
                           :chan       chan}))

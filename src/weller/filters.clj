@@ -29,21 +29,12 @@
   (= ((keyword "@type") resource) "NodeResource"))
 
 (defn event?
-  "Checks if message type is `event`.\\
-  Example:
-  ```clojure
-  (event? events/node-updated)
-  ```
-  will return true when the message :type key is org.alfresco.event.node.Updated. Supported message types are defined in [[weller.events]]"
+  "Checks if message type is `event`."
   [event]
   (partial #(= %1 (:type %2)) event))
 
 (defn aspect-added?
-  "Checks if an event corresponds to a repository node that has had specified aspect added.\\
-  Example:
-  ```clojure
-  (aspect-added? cm/asp-versionable)
-  ```"
+  "Checks if an event corresponds to a repository node that has had specified aspect added."
   [aspect]
   (partial #(let [aspect (name aspect)
                   aspects (get-in % [:data :resource :aspect-names])
@@ -55,11 +46,7 @@
                 false))))
 
 (defn aspect-removed?
-  "Checks if an event corresponds to a repository node that has had specified aspect removed.\\
-  Example:
-  ```clojure
-  (aspect-removed? cm/asp-versionable)
-  ```"
+  "Checks if an event corresponds to a repository node that has had specified aspect removed."
   [aspect]
   (partial #(let [aspect (name aspect)
                   aspects (get-in % [:data :resource :aspect-names])
@@ -199,7 +186,9 @@
                 false))))
 
 (defn property-value?
-  ;; TODO
   "Checks if an event represents a node with a specific property with a specific value."
-  []
-  )
+  [prop value]
+  (partial #(let [properties (get-in % [:data :resource :properties])]
+              (if-not (nil? properties)
+                (= (get properties prop) value)
+                false))))

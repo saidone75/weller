@@ -47,7 +47,9 @@
         (t/log! :info (format "stopping %s" component-name))
         (assoc this :running false)))))
 
-(defn make-handler [chan f]
+(defn make-handler
+  "Creates a message handler that will apply the function `f` on messages incoming from `chan`."
+  [chan f]
   (map->MessageHandler {:chan    chan
                         :f       f
                         :running false}))
