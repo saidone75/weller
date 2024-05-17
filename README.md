@@ -45,6 +45,37 @@ A simple function that prints the node name could be:
   [resource]
   (println (:name resource)))
 ```
+The resource part of the the message is converted to a plain Clojure map and looks like this (representing a node in
+this case):
+```
+{:primary-assoc-qname "cm:49d3a98c-6a2d-4851-a3a5-6de719033b90",
+ :properties
+ {:cm:auto-version true,
+  :cm:version-type "MAJOR",
+  :cm:auto-version-on-update-props false,
+  :cm:version-label "1.0",
+  :cm:initial-version true},
+ :secondary-parents [],
+ :is-file true,
+ :is-folder false,
+ :created-by-user {:id "admin", :display-name "Administrator"},
+ :content
+ {:mime-type "application/octet-stream",
+  :size-in-bytes 0,
+  :encoding "UTF-8"},
+ :primary-hierarchy
+ ["71290ab7-c07d-424e-a8b4-2eb3aefdd434"
+  "7cf72ac7-addc-4fe5-8af2-26d50dc9d575"
+  "81482fa8-3079-4187-96ae-43e36353d2c1"],
+ :name "49d3a98c-6a2d-4851-a3a5-6de719033b90",
+ :modified-at "2024-05-17T12:25:06.629Z",
+ :node-type "cm:content",
+ :id "8b799b25-6e1e-4ec9-92ad-7db2d6e5598e",
+ :modified-by-user {:id "admin", :display-name "Administrator"},
+ :aspect-names ["cm:versionable" "cm:auditable"],
+ :@type "NodeResource",
+ :created-at "2024-05-17T12:25:06.567Z"}
+```
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receive all ActiveMQ messages. Then at least one tap must
 be connected using the function `add-tap` that takes a filter and a (processing) function as arguments. Finally the pipe
