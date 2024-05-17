@@ -45,12 +45,17 @@ A simple function that prints the node name could be:
   (println (:name resource)))
 ```
 ### Build and start a message pipe
+The standard constructor `make-pipe` will create a pipe that will receive all ActiveMQ messages. Then at least one tap
+must be connected using the function `add-tap` that takes a filter and a (processing) function as arguments. Finally the
+pipe can be started manually by calling `component/start` on it.
 ```clojure
 (-> (pipe/make-pipe)
     (pipe/add-tap (filters/event? events/node-created) process-created-node)
     (pipe/add-tap (filters/event? events/node-deleted) process-deleted-node)
     (component/start))
 ```
+A *quick* constructor takes directly a filter and a function, the tap will be created and connected internally and the
+pipe started automatically:
 ```clojure
 (pipe/make-pipe (filters/event? events/node-created) process-created-node)
 ```
