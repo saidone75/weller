@@ -34,6 +34,7 @@ and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
             (some-fn (filters/node-aspect? cm/asp-titled)
                      (filters/node-aspect? cm/asp-dublincore)))
 ```
+The built-in filters are declared [here](src/weller/filters.clj) and the events [here](src/weller/events.clj).
 ### Create a function
 A (processing) function is the piece of code deputed to take the (the resource part of) message and do something with it.
 The (node) resource is a map representing (usually) a node in Alfresco.
@@ -45,9 +46,9 @@ A simple function that prints the node name could be:
   (println (:name resource)))
 ```
 ### Build and start a message pipe
-The standard constructor `make-pipe` will create a pipe that will receive all ActiveMQ messages. Then at least one tap
-must be connected using the function `add-tap` that takes a filter and a (processing) function as arguments. Finally the
-pipe can be started manually by calling `component/start` on it.
+The standard constructor `make-pipe` will create a pipe that receive all ActiveMQ messages. Then at least one tap must
+be connected using the function `add-tap` that takes a filter and a (processing) function as arguments. Finally the pipe
+can be started manually by calling `component/start` on it.
 ```clojure
 (-> (pipe/make-pipe)
     (pipe/add-tap (filters/event? events/node-created) process-created-node)
