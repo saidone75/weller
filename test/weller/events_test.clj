@@ -19,9 +19,9 @@
             [weller.components.component :as component]
             [weller.core :refer :all]
             [weller.events :as events]
-            [weller.filters :as filters]
             [weller.fixtures :as fixtures]
             [weller.pipe :as pipe]
+            [weller.predicates :as pred]
             [weller.test-utils :as tu])
   (:import (java.util UUID)))
 
@@ -29,7 +29,7 @@
 
 (deftest node-created-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/node-created) #(deliver result %))
+        pipe (pipe/make-pipe (pred/event? events/node-created) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
     (is (= (:name @result) name))
@@ -37,7 +37,7 @@
 
 (deftest node-updated-test
   (let [result (promise)
-        pipe (pipe/make-pipe (every-pred (filters/event? events/node-updated) (filters/is-file?)) #(deliver result %))
+        pipe (pipe/make-pipe (every-pred (pred/event? events/node-updated) (pred/is-file?)) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
     (is (= (:name @result) name))
@@ -45,7 +45,7 @@
 
 (deftest node-deleted-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/node-deleted) #(deliver result %))
+        pipe (pipe/make-pipe (pred/event? events/node-deleted) #(deliver result %))
         name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node name)
     (is (= (:name @result) name))
@@ -53,28 +53,28 @@
 
 (deftest child-assoc-created-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/child-assoc-created) #(deliver result %))]
+        pipe (pipe/make-pipe (pred/event? events/child-assoc-created) #(deliver result %))]
     (tu/create-then-delete-child-assoc)
     (is (= ((keyword "@type") @result) "ChildAssociationResource"))
     (component/stop pipe)))
 
 (deftest child-assoc-deleted-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/child-assoc-deleted) #(deliver result %))]
+        pipe (pipe/make-pipe (pred/event? events/child-assoc-deleted) #(deliver result %))]
     (tu/create-then-delete-child-assoc)
     (is (= ((keyword "@type") @result) "ChildAssociationResource"))
     (component/stop pipe)))
 
 (deftest peer-assoc-created-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/peer-assoc-created) #(deliver result %))]
+        pipe (pipe/make-pipe (pred/event? events/peer-assoc-created) #(deliver result %))]
     (tu/create-then-delete-peer-assoc)
     (is (= ((keyword "@type") @result) "PeerAssociationResource"))
     (component/stop pipe)))
 
 (deftest peer-assoc-deleted-test
   (let [result (promise)
-        pipe (pipe/make-pipe (filters/event? events/peer-assoc-deleted) #(deliver result %))]
+        pipe (pipe/make-pipe (pred/event? events/peer-assoc-deleted) #(deliver result %))]
     (tu/create-then-delete-peer-assoc)
     (is (= ((keyword "@type") @result) "PeerAssociationResource"))
     (component/stop pipe)))

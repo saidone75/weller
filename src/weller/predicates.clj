@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns weller.filters
+(ns weller.predicates
   (:require [clojure.core.async :as a])
   (:import (clojure.lang PersistentVector)))
 

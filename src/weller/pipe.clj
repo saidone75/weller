@@ -21,7 +21,7 @@
             [weller.components.component :as component]
             [weller.components.message-handler :as mh]
             [weller.config :as c]
-            [weller.filters :as filters]))
+            [weller.predicates :as pred]))
 
 (def component-name "Pipe")
 
@@ -50,7 +50,7 @@
         :running false))))
 
 (defn add-filtered-tap [this pred f]
-  (assoc this :taps (conj (:taps this) (mh/make-handler (filters/make-tap (:mult this) pred) f))))
+  (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f))))
 
 (defn make-pipe
   "Creates a pipe with a built-in ActiveMQ listener.
