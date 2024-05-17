@@ -199,7 +199,9 @@
                 false))))
 
 (defn property-value?
-  ;; TODO
   "Checks if an event represents a node with a specific property with a specific value."
-  []
-  )
+  [prop value]
+  (partial #(let [properties (get-in % [:data :resource :properties])]
+              (if-not (nil? properties)
+                (= (get properties prop) value)
+                false))))

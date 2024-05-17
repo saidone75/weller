@@ -147,5 +147,13 @@
         value (.toString (UUID/randomUUID))
         pipe (pipe/make-pipe (filters/property-previous-value? cm/prop-publisher value) #(deliver result %))]
     (tu/change-property cm/prop-publisher value)
-    @result
+    (is (not (nil? @result)))
+    (component/stop pipe)))
+
+(deftest property-value-test
+  (let [result (promise)
+        value (.toString (UUID/randomUUID))
+        pipe (pipe/make-pipe (filters/property-value? cm/prop-publisher value) #(deliver result %))]
+    (tu/change-property cm/prop-publisher value)
+    (is (= (get-in @result [:properties cm/prop-publisher]) value))
     (component/stop pipe)))
