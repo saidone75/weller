@@ -34,7 +34,7 @@ and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
             (some-fn (filters/node-aspect? cm/asp-titled)
                      (filters/node-aspect? cm/asp-dublincore)))
 ```
-The built-in predicates are declared [here](src/weller/filters.clj) while the events [here](src/weller/events.clj).
+The built-in predicates are declared [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
 ### Create a function
 A (processing) function is the piece of code deputed to take the (the resource part of) message and do something with it.
 The (node) resource is a map representing (usually) a node in Alfresco.
