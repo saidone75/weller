@@ -23,7 +23,7 @@
   (:import (jakarta.jms Session TextMessage)
            (org.apache.activemq ActiveMQConnection ActiveMQConnectionFactory)))
 
-(def component-name "ActiveMQ listener")
+(def ^:const component-name "ActiveMQ listener")
 
 (defrecord ActiveMqListener
   [config connection chan]
