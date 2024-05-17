@@ -23,7 +23,7 @@
             [weller.config :as c]
             [weller.predicates :as pred]))
 
-(def component-name "Pipe")
+(def ^:const component-name "Pipe")
 
 (defrecord Pipe
   [listener taps chan mult running]
@@ -49,7 +49,9 @@
         :listener (component/stop (:listener this))
         :running false))))
 
-(defn add-filtered-tap [this pred f]
+(defn add-filtered-tap
+  "Add a filtered tap to the pipe "
+  [this pred f]
   (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f))))
 
 (defn make-pipe

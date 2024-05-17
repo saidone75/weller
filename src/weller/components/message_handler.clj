@@ -19,7 +19,7 @@
             [taoensso.telemere :as t]
             [weller.components.component :as component]))
 
-(def component-name "MessageHandler")
+(def ^:const component-name "MessageHandler")
 
 (defrecord MessageHandler
   [chan f running]
