@@ -45,6 +45,15 @@ A simple function that prints the node name could be:
   [resource]
   (println (:name resource)))
 ```
+a more useful function could make use of the [CRAL](https://github.com/saidone75/cral) library to update the node on
+Alfresco (assuming that a valid ticket is store in config atom):
+```clojure
+(defn add-aspect
+  [resource]
+  (let [aspect-names (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :aspect-names])]
+    (->> (model/map->UpdateNodeBody {:aspect-names (conj aspect-names cm/asp-dublincore)})
+         (nodes/update-node (:ticket @c/config) (:id resource)))))
+```
 Note that the (resource part of) message is automatically converted to a plain Clojure map with keys changed to
 kebab-case and keywordized thus looks like this (representing a node in this case):
 ```
