@@ -8,33 +8,33 @@ Weller is like Alfresco out-of-process extensions but in Clojure.
 
 ## Usage
 ### Create filters by composing predicates
-Filters are used for selecting messages that will flow through a tap. Filters can discriminate the message by matching
+Filters are used for selecting messages that will flow through a tap. Filters can discriminate a message by matching
 several conditions (e.g. a node that has been created or deleted, an aspect that has been added to a node, a property
 that changed its value, etc.).
 
-Filters can be composed of a single predicate:
+Filters can be made of a single predicate:
 ```clojure
 (pred/event? events/node-updated)
 ```
-or a composition of predicates using `every-pred` (logical AND) or `some-fn` (logical OR) Clojure built-in functions.
+or by a composition of predicates using `every-pred` (logical AND) or `some-fn` (logical OR) Clojure built-in functions.
 
-E.g. this matches every updated node which is a file:
+E.g. this matches every updated node which is also file:
 ```clojure
 (every-pred (pred/event? events/node-updated)
             (pred/is-file?))
 ```
-this matches every node with `cm:titled` **or** `cm:dublincore` aspects (regardless of the event type): 
+this one matches every node with `cm:titled` **or** `cm:dublincore` aspects (regardless of the event type): 
 ```clojure
 (some-fn (pred/node-aspect? cm/asp-titled)
          (pred/node-aspect? cm/asp-dublincore))
 ```
-and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
+and this one matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
 ```clojure
 (every-pred (pred/event? events/node-updated)
             (some-fn (pred/node-aspect? cm/asp-titled)
                      (pred/node-aspect? cm/asp-dublincore)))
 ```
-The built-in predicates are declared [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
+The built-in predicates are available [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
 ### Create a function
 A (processing) function is the piece of code deputed to take the (resource part of) message and do something with it.
 The (node) resource is a map representing (usually) a node in Alfresco.
@@ -77,17 +77,17 @@ kebab-case and keywordized thus looks like this (representing a node in this cas
  :created-at "2024-05-17T12:25:06.567Z"}
 ```
 ### Build and start a message pipe
-The standard constructor `make-pipe` will create a pipe that receive all ActiveMQ messages. Then at least one tap must
-be connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note
-that in Clojure functions are first-class and can be passed-to or returned-from other functions). Finally the pipe can
-be started manually by calling `component/start` on it.
+The standard constructor `make-pipe` will create a pipe that receives ActiveMQ messages. Then at least one tap must be
+connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note that
+in Clojure functions are first-class and can be passed-to or returned-from other functions). Finally the pipe can be
+started manually by calling `component/start` on it.
 ```clojure
 (-> (pipe/make-pipe)
     (pipe/add-filtered-tap (pred/event? events/node-created) process-created-node)
     (pipe/add-filtered-tap (pred/event? events/node-deleted) process-deleted-node)
     (component/start))
 ```
-A *quick* constructor takes directly a filter and a function, the tap will be created and connected internally and the
+The *quick* constructor takes directly a filter and a function. A tap will be created and connected internally and the
 pipe started automatically:
 ```clojure
 (pipe/make-pipe (pred/event? events/node-created) process-created-node)
