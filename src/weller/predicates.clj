@@ -31,7 +31,7 @@
 (defn event?
   "Checks if message type is `event`."
   [event]
-  (partial #(= %1 (:type %2)) event))
+  (partial #(= (:type %) event)))
 
 (defn aspect-added?
   "Checks if an event corresponds to a repository node that has had specified aspect added."
