@@ -50,7 +50,7 @@
         :running false))))
 
 (defn add-filtered-tap
-  "Add a filtered tap to the pipe "
+  "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
   [this pred f]
   (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f))))
 
@@ -61,11 +61,11 @@
    ;; load configuration
    (c/configure)
    (let [chan (a/chan)]
-     (map->Pipe {:listener        (activemq/make-listener (:activemq @c/config) chan)
-                         :taps    []
-                         :chan    chan
-                         :mult    (a/mult chan)
-                         :running false})))
+     (map->Pipe {:listener (activemq/make-listener (:activemq @c/config) chan)
+                 :taps     []
+                 :chan     chan
+                 :mult     (a/mult chan)
+                 :running  false})))
   ([pred f]
    (-> (make-pipe)
        (add-filtered-tap pred f)

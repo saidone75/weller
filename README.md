@@ -36,7 +36,7 @@ and this matches updated nodes with `cm:titled` **or** `cm:dublincore` aspects:
 ```
 The built-in predicates are declared [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
 ### Create a function
-A (processing) function is the piece of code deputed to take the (the resource part of) message and do something with it.
+A (processing) function is the piece of code deputed to take the (resource part of) message and do something with it.
 The (node) resource is a map representing (usually) a node in Alfresco.
 
 A simple function that prints the node name could be:
@@ -45,8 +45,8 @@ A simple function that prints the node name could be:
   [resource]
   (println (:name resource)))
 ```
-The resource part of the the message is converted to a plain Clojure map and looks like this (representing a node in
-this case):
+Note that the (resource part of) message is automatically converted to a plain Clojure map with keys changed to
+kebab-case and keywordized thus looks like this (representing a node in this case):
 ```
 {:primary-assoc-qname "cm:49d3a98c-6a2d-4851-a3a5-6de719033b90",
  :properties
@@ -78,13 +78,13 @@ this case):
 ```
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receive all ActiveMQ messages. Then at least one tap must
-be connected using the function `add-tap` that takes a filter and a (processing) function as arguments (note that in
-Clojure functions are first-class and can be passed-to or returned-from other functions). Finally the pipe can be
-started manually by calling `component/start` on it.
+be connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note
+that in Clojure functions are first-class and can be passed-to or returned-from other functions). Finally the pipe can
+be started manually by calling `component/start` on it.
 ```clojure
 (-> (pipe/make-pipe)
-    (pipe/add-tap (pred/event? events/node-created) process-created-node)
-    (pipe/add-tap (pred/event? events/node-deleted) process-deleted-node)
+    (pipe/add-filtered-tap (pred/event? events/node-created) process-created-node)
+    (pipe/add-filtered-tap (pred/event? events/node-deleted) process-deleted-node)
     (component/start))
 ```
 A *quick* constructor takes directly a filter and a function, the tap will be created and connected internally and the
