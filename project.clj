@@ -19,9 +19,9 @@
   :url "https://saidone.org"
   :license {:name "GNU General Public License v3.0"
             :url  "https://www.gnu.org/licenses/gpl-3.0.txt"}
-  :dependencies [[org.clojure/clojure "1.11.1"]
+  :dependencies [[org.clojure/clojure "1.11.3"]
                  [com.stuartsierra/component "1.1.0"]
-                 [org.apache.activemq/activemq-broker "6.1.1"]
+                 [org.apache.activemq/activemq-broker "6.1.2"]
                  [org.clojure/data.json "2.5.0"]
                  [org.saidone/cral "0.3.2"]
                  [com.taoensso/telemere "1.0.0-beta9"]
