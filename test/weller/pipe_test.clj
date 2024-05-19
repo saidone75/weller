@@ -28,16 +28,16 @@
 
 (use-fixtures :once fixtures/ticket)
 
-(def node-name "test node name")
+(def ^:const node-name "test node name")
 
-(defn- get-node-name
+(defn- get-node-name-with-cral
   [resource]
   (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :name]))
 
 (deftest make-pipe-test
   (let [result (promise)
         pipe (pipe/make-pipe)
-        pipe (pipe/add-filtered-tap pipe (pred/event? events/node-created) #(deliver result (get-node-name %)))]
+        pipe (pipe/add-filtered-tap pipe (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))]
     (component/start pipe)
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
@@ -46,7 +46,7 @@
 (deftest simple-make-pipe-test
   (let [result (promise)
         ;; note that pipe is started automatically with this constructor
-        pipe (pipe/make-pipe (pred/event? events/node-created) #(deliver result (get-node-name %)))]
+        pipe (pipe/make-pipe (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))]
     (tu/create-then-update-then-delete-node node-name)
     (t/log! @result)
     (component/stop pipe)))

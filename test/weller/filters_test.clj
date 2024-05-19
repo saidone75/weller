@@ -39,7 +39,6 @@
   (let [result (promise)
         pipe (pipe/make-pipe (every-pred (pred/event? events/node-updated) (pred/aspect-removed? cm/asp-versionable)) #(deliver result %))]
     (tu/add-then-remove-aspect cm/asp-versionable)
-    (println @result)
     (is (not (.contains ^PersistentVector (:aspect-names @result) (name cm/asp-versionable))))
     (component/stop pipe)))
 

@@ -45,8 +45,8 @@ A simple function that prints the node name could be:
   [resource]
   (println (:name resource)))
 ```
-a more useful function could make use of the [CRAL](https://github.com/saidone75/cral) library to update the node on
-Alfresco (assuming that a valid ticket is store in config atom):
+a more useful function that make use of the [CRAL](https://github.com/saidone75/cral) library to update the node on
+Alfresco:
 ```clojure
 (defn add-aspect
   [resource]
