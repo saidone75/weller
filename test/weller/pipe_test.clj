@@ -56,3 +56,14 @@
         pipe (component/start pipe)
         pipe (component/stop pipe)]
     (component/stop pipe)))
+
+(deftest remove-then-add-tap-test
+  (let [result (promise)
+        ;; note that pipe is started automatically with this constructor
+        pipe (-> (pipe/make-pipe (pred/event? events/node-deleted) (fn [_] (deliver result nil)))
+                 (pipe/remove-taps)
+                 (pipe/add-filtered-tap (pred/event? events/node-created) #(deliver result %))
+                 (component/start))]
+    (tu/create-then-update-then-delete-node)
+    (is (not (nil? @result)))
+    (component/stop pipe)))
