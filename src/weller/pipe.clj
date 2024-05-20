@@ -52,7 +52,18 @@
 (defn add-filtered-tap
   "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
   [this pred f]
-  (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f))))
+  (if (:running this)
+    (do
+      (t/log! :warn (format "please stop %s before adding taps" component-name))
+      this)
+    (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f)))))
+
+(defn remove-taps
+  "Stop the pipe and remove all taps from it."
+  [this]
+  (if (:running this)
+    (assoc (component/stop this) :taps [])
+    (assoc this :taps [])))
 
 (defn make-pipe
   "Creates a pipe with a built-in ActiveMQ listener.
