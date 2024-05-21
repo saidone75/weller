@@ -15,7 +15,8 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.config
-  (:require [immuconf.config :as immu]
+  (:require [clojure.string :as str]
+            [immuconf.config :as immu]
             [taoensso.telemere :as t]))
 
 (def config (atom {:alfresco {:scheme         "http"
@@ -32,11 +33,25 @@
                               :port   61616
                               :topic  "alfresco.repo.event2"}}))
 
-(defn configure
-  []
+(def ^:private cfg-files
+  ["resources/weller.edn"
+   "~/.weller/weller.edn"
+   "./weller.edn"])
+
+(defn- expand-home [path]
+  (if (str/starts-with? path "~/")
+    (str/replace path #"^~" (System/getProperty "user.home"))
+    path))
+
+(defn- load-cfg-file [_ file-name]
   (try
-    (let [cfg (immu/load "resources/config.edn")]
+    (let [cfg (immu/load file-name)]
       (swap! config assoc :alfresco (merge (:alfresco @config) (:alfresco cfg)))
       (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg))))
-    (catch Exception e (t/log! :error (.getMessage e))))
-  (t/log! :debug @config))
+    (catch Exception e (t/log! :warn (.getMessage e)))))
+
+(defn configure
+  []
+  (reduce
+    load-cfg-file
+    (map expand-home cfg-files)))
