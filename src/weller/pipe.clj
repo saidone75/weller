@@ -59,7 +59,7 @@
     (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f)))))
 
 (defn remove-taps
-  "Stop the pipe and remove all taps from it."
+  "Stop the pipe if running and remove all taps from it."
   [this]
   (if (:running this)
     (assoc (component/stop this) :taps [])

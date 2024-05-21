@@ -17,18 +17,16 @@
 (ns weller.pipe-test
   (:require [clojure.test :refer :all]
             [cral.api.core.nodes :as nodes]
-            [taoensso.telemere :as t]
             [weller.components.component :as component]
             [weller.config :as c]
             [weller.events :as events]
             [weller.fixtures :as fixtures]
             [weller.pipe :as pipe]
             [weller.predicates :as pred]
-            [weller.test-utils :as tu]))
+            [weller.test-utils :as tu])
+  (:import (java.util UUID)))
 
 (use-fixtures :once fixtures/ticket)
-
-(def ^:const node-name "test node name")
 
 (defn- get-node-name-with-cral
   [resource]
@@ -36,25 +34,27 @@
 
 (deftest make-pipe-test
   (let [result (promise)
-        pipe (pipe/make-pipe)
-        pipe (pipe/add-filtered-tap pipe (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))]
-    (component/start pipe)
+        pipe (-> (pipe/make-pipe)
+                 (pipe/add-filtered-tap (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))
+                 (component/start))
+        node-name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node node-name)
-    (t/log! @result)
+    (is (= @result node-name))
     (component/stop pipe)))
 
 (deftest simple-make-pipe-test
   (let [result (promise)
         ;; note that pipe is started automatically with this constructor
-        pipe (pipe/make-pipe (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))]
+        pipe (pipe/make-pipe (pred/event? events/node-created) #(deliver result (get-node-name-with-cral %)))
+        node-name (.toString (UUID/randomUUID))]
     (tu/create-then-update-then-delete-node node-name)
-    (t/log! @result)
+    (is (= @result node-name))
     (component/stop pipe)))
 
 (deftest simple-make-pipe-double-start-double-stop-test
-  (let [pipe (pipe/make-pipe (pred/event? events/node-created) nil)
-        pipe (component/start pipe)
-        pipe (component/stop pipe)]
+  (let [pipe (-> (pipe/make-pipe (pred/event? events/node-created) nil)
+                 (component/start)
+                 (component/stop))]
     (component/stop pipe)))
 
 (deftest remove-then-add-tap-test

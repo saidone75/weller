@@ -24,6 +24,6 @@
   (c/configure)
   ;; configure CRAL
   (cral.config/configure (:alfresco @c/config))
-  ;; put an Alfresco ticket in config atom for tests
+  ;; put an Alfresco ticket in config atom later use
   (swap! c/config assoc :ticket (get-in (auth/create-ticket (get-in @c/config [:alfresco :user]) (get-in @c/config [:alfresco :password])) [:body :entry]))
   (f))
