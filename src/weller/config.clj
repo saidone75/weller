@@ -17,6 +17,7 @@
 (ns weller.config
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
+            [cral.api.auth :as auth]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]))
 
@@ -71,6 +72,11 @@
       (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg)))
       (reset! config (parse-values @config resolve-placeholder)))
     (catch Exception e (t/log! :warn (.getMessage e))))
+  ;; configure CRAL
+  (cral.config/configure (:alfresco @config))
+  ;; authenticate on Alfresco and store ticket
+  (swap! config assoc :alfresco
+         (assoc (:alfresco @config) :ticket (get-in (auth/create-ticket (get-in @config [:alfresco :user]) (get-in @config [:alfresco :password])) [:body :entry])))
   (t/log! :trace @config))
 
 (defn configure

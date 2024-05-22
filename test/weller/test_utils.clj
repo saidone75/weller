@@ -31,12 +31,12 @@
 
 (defn- get-guest-home
   []
-  (get-in (nodes/get-node (:ticket @c/config) "-root-" (model/map->GetNodeQueryParams {:relative-path "/Guest Home"})) [:body :entry :id]))
+  (get-in (nodes/get-node (get-in @c/config [:alfresco :ticket]) "-root-" (model/map->GetNodeQueryParams {:relative-path "/Guest Home"})) [:body :entry :id]))
 
 (defn- create-folder
   []
   (->> (model/map->CreateNodeBody {:name (.toString (UUID/randomUUID)) :node-type cm/type-folder})
-       (nodes/create-node (:ticket @c/config) (get-guest-home))
+       (nodes/create-node (get-in @c/config [:alfresco :ticket]) (get-guest-home))
        (#(get-in % [:body :entry :id]))))
 
 (defn- create-node
@@ -46,26 +46,26 @@
    (create-node name (get-guest-home)))
   ([name parent-id]
    (->> (model/map->CreateNodeBody {:name name :node-type cm/type-content})
-        (nodes/create-node (:ticket @c/config) parent-id)
+        (nodes/create-node (get-in @c/config [:alfresco :ticket]) parent-id)
         (#(get-in % [:body :entry :id])))))
 
 (defn- update-node
   [node-id]
   (->> (model/map->UpdateNodeBody {:properties {cm/prop-title (.toString (UUID/randomUUID))}})
-       (nodes/update-node (:ticket @c/config) node-id)
+       (nodes/update-node (get-in @c/config [:alfresco :ticket]) node-id)
        (#(get-in % [:body :entry :id]))))
 
 (defn- update-node-content
   [node-id]
   (let [file-to-be-uploaded (File/createTempFile "tmp." ".txt")]
     (spit file-to-be-uploaded (gen-str (rand-int (math/pow 2 16))))
-    (nodes/update-node-content (:ticket @c/config) node-id file-to-be-uploaded)
+    (nodes/update-node-content (get-in @c/config [:alfresco :ticket]) node-id file-to-be-uploaded)
     (io/delete-file file-to-be-uploaded)
     node-id))
 
 (defn- delete-node
   [node-id]
-  (nodes/delete-node (:ticket @c/config) node-id {:permanent true}))
+  (nodes/delete-node (get-in @c/config [:alfresco :ticket]) node-id {:permanent true}))
 
 (defn create-then-update-then-delete-node
   ([]
@@ -82,7 +82,7 @@
   (let [node-id (create-node)
         folder-id (create-folder)]
     (->> (model/map->MoveNodeBody {:target-parent-id folder-id})
-         (nodes/move-node (:ticket @c/config) node-id))
+         (nodes/move-node (get-in @c/config [:alfresco :ticket]) node-id))
     (delete-node node-id)
     (delete-node folder-id)))
 
@@ -90,7 +90,7 @@
   [type]
   (let [created-node-id (create-node)]
     (->> (model/map->UpdateNodeBody {:node-type type})
-         (nodes/update-node (:ticket @c/config) created-node-id))
+         (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
     (delete-node created-node-id)))
 
 (defn add-then-remove-property
@@ -99,9 +99,9 @@
   ([prop value]
    (let [created-node-id (create-node)]
      (->> (model/map->UpdateNodeBody {:properties {prop value}})
-          (nodes/update-node (:ticket @c/config) created-node-id))
+          (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
      (->> (model/map->UpdateNodeBody {:properties {prop nil}})
-          (nodes/update-node (:ticket @c/config) created-node-id))
+          (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
      (delete-node created-node-id))))
 
 (defn change-property
@@ -110,9 +110,9 @@
   ([prop initial-value]
    (let [created-node-id (create-node)]
      (->> (model/map->UpdateNodeBody {:properties {prop initial-value}})
-          (nodes/update-node (:ticket @c/config) created-node-id))
+          (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
      (->> (model/map->UpdateNodeBody {:properties {prop (.toString (UUID/randomUUID))}})
-          (nodes/update-node (:ticket @c/config) created-node-id))
+          (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
      (delete-node created-node-id))))
 
 (defn create-then-delete-child-assoc
@@ -120,8 +120,8 @@
   (let [parent-node-id (create-folder)
         child-node-id (create-node)]
     (->> [(model/map->CreateSecondaryChildBody {:child-id child-node-id :assoc-type cm/assoc-contains})]
-         (nodes/create-secondary-child (:ticket @c/config) parent-node-id))
-    (nodes/delete-secondary-child (:ticket @c/config) parent-node-id child-node-id)
+         (nodes/create-secondary-child (get-in @c/config [:alfresco :ticket]) parent-node-id))
+    (nodes/delete-secondary-child (get-in @c/config [:alfresco :ticket]) parent-node-id child-node-id)
     (delete-node child-node-id)
     (delete-node parent-node-id)))
 
@@ -129,16 +129,16 @@
   []
   (let [created-node-id (create-node)]
     (->> (model/map->CreateNodeAssocsBody {:target-id created-node-id :assoc-type cm/assoc-contains})
-         (nodes/create-node-assocs (:ticket @c/config) (get-guest-home)))
-    (nodes/delete-node-assocs (:ticket @c/config) (get-guest-home) created-node-id)
+         (nodes/create-node-assocs (get-in @c/config [:alfresco :ticket]) (get-guest-home)))
+    (nodes/delete-node-assocs (get-in @c/config [:alfresco :ticket]) (get-guest-home) created-node-id)
     (delete-node created-node-id)))
 
 (defn add-then-remove-aspect
   [aspect-name]
   (let [created-node-id (create-node)
-        aspect-names (get-in (nodes/get-node (:ticket @c/config) created-node-id) [:body :entry :aspect-names])]
+        aspect-names (get-in (nodes/get-node (get-in @c/config [:alfresco :ticket]) created-node-id) [:body :entry :aspect-names])]
     (->> (model/map->UpdateNodeBody {:aspect-names (conj aspect-names aspect-name)})
-         (nodes/update-node (:ticket @c/config) created-node-id))
+         (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
     (->> (model/map->UpdateNodeBody {:aspect-names aspect-names})
-         (nodes/update-node (:ticket @c/config) created-node-id))
+         (nodes/update-node (get-in @c/config [:alfresco :ticket]) created-node-id))
     (delete-node created-node-id)))
