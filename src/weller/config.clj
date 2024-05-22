@@ -16,6 +16,7 @@
 
 (ns weller.config
   (:require [clojure.string :as str]
+            [clojure.walk :as walk]
             [immuconf.config :as immu]
             [taoensso.telemere :as t]))
 
@@ -43,15 +44,37 @@
     (str/replace path #"^~" (System/getProperty "user.home"))
     path))
 
-(defn- load-cfg-file [_ file-name]
+(defn- extract-var [v]
+  (let [v (rest (re-matches #"^\$\{([^:]+):(.*)\}$" (str v)))]
+    (if-not (empty? v)
+      v
+      nil)))
+
+(defn- resolve-placeholder [v]
+  (if-let [var (extract-var v)]
+    (if-let [val (System/getenv (first var))]
+      val
+      (last var))
+    v))
+
+(defn- parse-values
+  [m f]
+  (let [f (fn [[k v]] [k (if (map? v) v (f v))])]
+    ;; only apply to maps
+    (walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+(defn- load-cfg-file [file-name]
   (try
     (let [cfg (immu/load file-name)]
+      (t/log! :info (format "loading config file %s" file-name))
       (swap! config assoc :alfresco (merge (:alfresco @config) (:alfresco cfg)))
-      (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg))))
-    (catch Exception e (t/log! :warn (.getMessage e)))))
+      (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg)))
+      (reset! config (parse-values @config resolve-placeholder)))
+    (catch Exception e (t/log! :warn (.getMessage e))))
+  (t/log! :trace @config))
 
 (defn configure
   []
-  (reduce
+  (run!
     load-cfg-file
     (map expand-home cfg-files)))
