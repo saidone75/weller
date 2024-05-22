@@ -20,8 +20,7 @@
             [weller.components.activemq-listener :as activemq]
             [weller.components.component :as component]
             [weller.components.message-handler :as mh]
-            [weller.config :as c]
-            [weller.predicates :as pred]))
+            [weller.config :as c]))
 
 (def ^:const component-name "Pipe")
 
@@ -49,6 +48,12 @@
         :listener (component/stop (:listener this))
         :running false))))
 
+(defn make-tap
+  "Return a filtered tap connected to the `mult` channel.
+  The returned tap is filtered by predicate `pred`."
+  [mult pred]
+  (a/tap mult (a/chan 1 (filter pred))))
+
 (defn add-filtered-tap
   "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
   [this pred f]
@@ -56,7 +61,7 @@
     (do
       (t/log! :warn (format "please stop %s before adding taps" component-name))
       this)
-    (assoc this :taps (conj (:taps this) (mh/make-handler (pred/make-tap (:mult this) pred) f)))))
+    (assoc this :taps (conj (:taps this) (mh/make-handler (make-tap (:mult this) pred) f)))))
 
 (defn remove-taps
   "Stop the pipe if running and remove all taps from it."

@@ -19,14 +19,11 @@
             [cral.model.alfresco.cm :as cm]
             [weller.components.component :as component]
             [weller.events :as events]
-            [weller.fixtures :as fixtures]
             [weller.pipe :as pipe]
             [weller.predicates :as pred]
             [weller.test-utils :as tu])
   (:import (clojure.lang PersistentVector)
            (java.util UUID)))
-
-(use-fixtures :once fixtures/ticket)
 
 (deftest aspect-added-test
   (let [result (promise)

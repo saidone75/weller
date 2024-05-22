@@ -1,2 +1,2 @@
 {:allow ["*"]
- :deny ["weller.config"]}
+ :deny ["Xweller.config"]}

@@ -19,13 +19,10 @@
             [weller.components.component :as component]
             [weller.core :refer :all]
             [weller.events :as events]
-            [weller.fixtures :as fixtures]
             [weller.pipe :as pipe]
             [weller.predicates :as pred]
             [weller.test-utils :as tu])
   (:import (java.util UUID)))
-
-(use-fixtures :once fixtures/ticket)
 
 (deftest node-created-test
   (let [result (promise)

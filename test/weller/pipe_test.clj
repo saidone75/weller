@@ -20,13 +20,10 @@
             [weller.components.component :as component]
             [weller.config :as c]
             [weller.events :as events]
-            [weller.fixtures :as fixtures]
             [weller.pipe :as pipe]
             [weller.predicates :as pred]
             [weller.test-utils :as tu])
   (:import (java.util UUID)))
-
-(use-fixtures :once fixtures/ticket)
 
 (defn- get-node-name-with-cral
   [resource]
