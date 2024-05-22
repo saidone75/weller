@@ -15,14 +15,7 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.predicates
-  (:require [clojure.core.async :as a])
   (:import (clojure.lang PersistentVector)))
-
-(defn make-tap
-  "Return a filtered tap connected to the `mult` channel.
-  The returned tap is filtered by predicate `pred`."
-  [mult pred]
-  (a/tap mult (a/chan 1 (filter pred))))
 
 (defn- is-node-resource?
   [resource]
