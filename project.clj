@@ -14,7 +14,7 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(defproject org.saidone/weller "0.1.0"
+(defproject org.saidone/weller "0.1.1-SNAPSHOT"
   :description "Alfresco out-of-process extensions in Clojure"
   :url "https://saidone.org"
   :license {:name "GNU General Public License v3.0"
