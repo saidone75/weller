@@ -1,5 +1,7 @@
-# weller
-Weller is like Alfresco out-of-process extensions but in Clojure.
+# Weller
+![](https://upload.wikimedia.org/wikipedia/commons/d/de/Sam-weller-kyd.jpeg)
+
+Weller is like Alfresco out-of-process extensions but in [Clojure](https://clojure.org).
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
 [![cljdoc badge](https://cljdoc.org/badge/org.saidone/weller)](https://cljdoc.org/d/org.saidone/weller)
@@ -8,6 +10,7 @@ Weller is like Alfresco out-of-process extensions but in Clojure.
 - Lean and readable code
 - 100% pure Clojure
 - 100% test coverage
+- Benefits from programming at the [REPL](https://clojure.org/guides/repl/introduction)
 
 ## Usage
 ### Create filters by composing predicates
