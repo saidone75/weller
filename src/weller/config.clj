@@ -71,16 +71,16 @@
       (swap! config assoc :alfresco (merge (:alfresco @config) (:alfresco cfg)))
       (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg)))
       (reset! config (parse-values @config resolve-placeholder)))
-    (catch Exception e (t/log! :warn (.getMessage e))))
+    (catch Exception e (t/log! :warn (.getMessage e)))))
+
+(defn configure
+  []
+  (run!
+    load-cfg-file
+    (map expand-home cfg-files))
   ;; configure CRAL
   (cral.config/configure (:alfresco @config))
   ;; authenticate on Alfresco and store ticket
   (swap! config assoc :alfresco
          (assoc (:alfresco @config) :ticket (get-in (auth/create-ticket (get-in @config [:alfresco :user]) (get-in @config [:alfresco :password])) [:body :entry])))
   (t/log! :trace @config))
-
-(defn configure
-  []
-  (run!
-    load-cfg-file
-    (map expand-home cfg-files)))
