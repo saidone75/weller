@@ -10,7 +10,7 @@ Weller is like Alfresco out-of-process extensions but in [Clojure](https://cloju
 - Lean and readable code
 - 100% pure Clojure
 - 100% test coverage
-- Benefits from the [REPL](https://clojure.org/guides/repl/introduction) programming
+- Benefits from programming at the [REPL](https://clojure.org/guides/repl/introduction)
 
 ## Usage
 ### Create filters by composing predicates
