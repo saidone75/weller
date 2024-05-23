@@ -1,4 +1,6 @@
 # weller
+![](https://upload.wikimedia.org/wikipedia/commons/d/de/Sam-weller-kyd.jpeg)
+
 Weller is like Alfresco out-of-process extensions but in Clojure.
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
