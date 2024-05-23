@@ -88,6 +88,38 @@ kebab-case and keywordized thus looks like this (representing a node in this cas
  :@type "NodeResource",
  :created-at "2024-05-17T12:25:06.567Z"}
 ```
+### Configuration
+Configuration is stored internally in the atom `weller.config/config`. It contains a map like this:
+```clojure
+{:alfresco {:scheme         "http"
+            :host           "localhost"
+            :port           8080
+            :core-path      "alfresco/api/-default-/public/alfresco/versions/1"
+            :search-path    "alfresco/api/-default-/public/search/versions/1"
+            :auth-path      "alfresco/api/-default-/public/authentication/versions/1"
+            :discovery-path "alfresco/api/discovery"
+            :user           "admin"
+            :password       "admin"}
+ :activemq {:scheme "tcp"
+            :host   "localhost"
+            :port   61616
+            :topic  "alfresco.repo.event2"}}
+```
+When a message pipe is started then `weller.config/configure` is called and will try to load these files (in order):
+```clojure
+(def ^:private cfg-files
+  ["resources/weller.edn"
+   "~/.weller/weller.edn"
+   "./weller.edn"])
+```
+each (map contained in) file is (deep) merged with the previous, and values being overwritten by the most recent.
+Placeholders for environment variables can be used, e.g.:
+```clojure
+{:alfresco {:user     "${ALF_USER:admin}"
+            :password "${ALF_PASS:admin}"}}
+```
+will look for ALF_USER and ALF_PASS environment variables if defined, otherwise the default value will be used.
+Environment variables will win over the configuration files.
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receives ActiveMQ messages. Then at least one tap must be
 connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note that
