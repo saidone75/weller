@@ -120,6 +120,10 @@ Placeholders for environment variables can be used, e.g.:
 ```
 will look for ALF_USER and ALF_PASS environment variables if defined, otherwise the default value will be used.
 Environment variables will win over the configuration files.
+
+Lastly `cral.config/configure` is called and an Alfresco ticket is requested and then stored in `:alfresco :ticket`
+section of the map. It can be retrieved with `(get-in @c/config [:alfresco :ticket])` (assuming that config has been
+imported as `[weller.config :as c]`).
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receives ActiveMQ messages. Then at least one tap must be
 connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note that
