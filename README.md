@@ -1,4 +1,4 @@
-# weller
+# Weller
 ![](https://upload.wikimedia.org/wikipedia/commons/d/de/Sam-weller-kyd.jpeg)
 
 Weller is like Alfresco out-of-process extensions but in Clojure.
