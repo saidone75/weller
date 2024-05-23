@@ -40,6 +40,13 @@
    "~/.weller/weller.edn"
    "./weller.edn"])
 
+(defn deep-merge [& maps]
+  (apply merge-with (fn [& args]
+                      (if (every? map? args)
+                        (apply deep-merge args)
+                        (last args)))
+         maps))
+
 (defn- expand-home [path]
   (if (str/starts-with? path "~/")
     (str/replace path #"^~" (System/getProperty "user.home"))
@@ -68,8 +75,7 @@
   (try
     (let [cfg (immu/load file-name)]
       (t/log! :info (format "loading config file %s" file-name))
-      (swap! config assoc :alfresco (merge (:alfresco @config) (:alfresco cfg)))
-      (swap! config assoc :activemq (merge (:activemq @config) (:activemq cfg)))
+      (swap! config deep-merge cfg)
       (reset! config (parse-values @config resolve-placeholder)))
     (catch Exception e (t/log! :warn (.getMessage e)))))
 
