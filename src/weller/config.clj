@@ -82,21 +82,18 @@
 (defn ticket
   "Validates and returns the ticket in `config` atom if present, otherwise returns a new one and stores it in `config`."
   []
-  (if-let [ticket (get-in @config [:alfresco :ticket])]
+  (let [ticket (get-in @config [:alfresco :ticket])]
     (if (= (:status (auth/validate-ticket ticket)) 200)
       ticket
-      (do
-        (swap! config assoc-in [:alfresco :ticket] nil)
-        (ticket)))
-    (get-in
-      (swap! config assoc :alfresco
-             (assoc (:alfresco @config)
-               :ticket
-               (get-in (auth/create-ticket
-                         (get-in @config [:alfresco :user])
-                         (get-in @config [:alfresco :password]))
-                       [:body :entry])))
-      [:alfresco :ticket])))
+      (get-in
+        (swap! config assoc :alfresco
+               (assoc (:alfresco @config)
+                 :ticket
+                 (get-in (auth/create-ticket
+                           (get-in @config [:alfresco :user])
+                           (get-in @config [:alfresco :password]))
+                         [:body :entry])))
+        [:alfresco :ticket]))))
 
 (defn configure
   []
