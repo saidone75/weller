@@ -79,6 +79,22 @@
       (reset! config (parse-values @config resolve-placeholder)))
     (catch Exception e (t/log! :warn (.getMessage e)))))
 
+(defn ticket
+  "Validates and returns the ticket in `config` atom if present, otherwise returns a new one and stores it in `config`."
+  []
+  (let [ticket (get-in @config [:alfresco :ticket])]
+    (if (= (:status (auth/validate-ticket ticket)) 200)
+      ticket
+      (get-in
+        (swap! config assoc :alfresco
+               (assoc (:alfresco @config)
+                 :ticket
+                 (get-in (auth/create-ticket
+                           (get-in @config [:alfresco :user])
+                           (get-in @config [:alfresco :password]))
+                         [:body :entry])))
+        [:alfresco :ticket]))))
+
 (defn configure
   []
   (run!
@@ -86,14 +102,5 @@
     (map expand-home cfg-files))
   ;; configure CRAL
   (cral.config/configure (:alfresco @config))
-  ;; authenticate on Alfresco and store ticket
-  (swap! config assoc :alfresco
-         (assoc (:alfresco @config) :ticket (get-in (auth/create-ticket (get-in @config [:alfresco :user]) (get-in @config [:alfresco :password])) [:body :entry])))
+  (ticket)
   (t/log! :trace @config))
-
-(defn ticket
-  ;; TODO
-  ;; - validate ticket
-  ;; - if expired request e new one
-  []
-  (get-in @config [:alfresco :ticket]))
