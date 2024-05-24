@@ -1,10 +1,10 @@
 # Weller
 Weller is like Alfresco out-of-process extensions but in [Clojure](https://clojure.org).
 
-<img src="https://victorianweb.org/art/illustration/kyd/59.jpg" width="512">
-
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
 [![cljdoc badge](https://cljdoc.org/badge/org.saidone/weller)](https://cljdoc.org/d/org.saidone/weller)
+
+<img src="https://victorianweb.org/art/illustration/kyd/59.jpg" width="512">
 
 ## Outline
 - Lean and readable code
