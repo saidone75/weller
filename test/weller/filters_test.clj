@@ -21,6 +21,7 @@
             [weller.events :as events]
             [weller.pipe :as pipe]
             [weller.predicates :as pred]
+            [weller.predicates-extra :as xpred]
             [weller.test-utils :as tu])
   (:import (clojure.lang PersistentVector)
            (java.util UUID)))
@@ -152,4 +153,11 @@
         pipe (pipe/make-pipe (pred/property-value? cm/prop-publisher value) #(deliver result %))]
     (tu/change-property cm/prop-publisher value)
     (is (= (get-in @result [:properties cm/prop-publisher]) value))
+    (component/stop pipe)))
+
+(deftest in-path-test
+  (let [result (promise)
+        pipe (pipe/make-pipe (every-pred (pred/event? events/node-created) (xpred/in-path? "/Company Home/Guest Home")) #(deliver result %))]
+    (tu/create-then-update-then-delete-node)
+    (println @result)
     (component/stop pipe)))

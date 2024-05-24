@@ -90,3 +90,10 @@
   (swap! config assoc :alfresco
          (assoc (:alfresco @config) :ticket (get-in (auth/create-ticket (get-in @config [:alfresco :user]) (get-in @config [:alfresco :password])) [:body :entry])))
   (t/log! :trace @config))
+
+(defn ticket
+  ;; TODO
+  ;; - validate ticket
+  ;; - if expired request e new one
+  []
+  (get-in @config [:alfresco :ticket]))
