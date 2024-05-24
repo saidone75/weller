@@ -1,5 +1,6 @@
 # Weller
-![](https://upload.wikimedia.org/wikipedia/commons/d/de/Sam-weller-kyd.jpeg)
+
+<img src="https://victorianweb.org/art/illustration/kyd/59.jpg" width="512">
 
 Weller is like Alfresco out-of-process extensions but in [Clojure](https://clojure.org).
 
