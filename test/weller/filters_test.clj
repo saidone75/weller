@@ -159,5 +159,5 @@
   (let [result (promise)
         pipe (pipe/make-pipe (every-pred (pred/event? events/node-created) (xpred/in-path? "/Company Home/Guest Home")) #(deliver result %))]
     (tu/create-then-update-then-delete-node)
-    (println @result)
+    (is (not (nil? @result)))
     (component/stop pipe)))

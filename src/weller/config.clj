@@ -15,10 +15,10 @@
 ;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns weller.config
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.walk :as walk]
             [cral.api.auth :as auth]
-            [immuconf.config :as immu]
             [taoensso.telemere :as t]))
 
 (def config (atom {:alfresco {:scheme         "http"
@@ -73,7 +73,7 @@
 
 (defn- load-cfg-file [file-name]
   (try
-    (let [cfg (immu/load file-name)]
+    (let [cfg (edn/read-string (slurp file-name))]
       (t/log! :info (format "loading config file %s" file-name))
       (swap! config deep-merge cfg)
       (reset! config (parse-values @config resolve-placeholder)))
@@ -103,4 +103,5 @@
   ;; configure CRAL
   (cral.config/configure (:alfresco @config))
   (ticket)
-  (t/log! :trace @config))
+  (t/log! :trace @config)
+  @config)
