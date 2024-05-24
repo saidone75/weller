@@ -35,7 +35,7 @@
                               :port   61616
                               :topic  "alfresco.repo.event2"}}))
 
-(def ^:private cfg-files
+(def ^:const cfg-files
   ["resources/weller.edn"
    "~/.weller/weller.edn"
    "./weller.edn"])
