@@ -1,5 +1,5 @@
 # Weller
-Weller is like Alfresco out-of-process extensions but in [Clojure](https://clojure.org).
+Weller is like [Alfresco](https://docs.alfresco.com/content-services/latest/develop/oop-sdk/) out-of-process extensions but in [Clojure](https://clojure.org).
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
 [![cljdoc badge](https://cljdoc.org/badge/org.saidone/weller)](https://cljdoc.org/d/org.saidone/weller)
