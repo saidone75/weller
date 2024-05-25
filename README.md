@@ -56,9 +56,9 @@ Alfresco:
 ```clojure
 (defn add-aspect
   [resource]
-  (let [aspect-names (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :aspect-names])]
+  (let [aspect-names (get-in (nodes/get-node (c/ticket) (:id resource)) [:body :entry :aspect-names])]
     (->> (model/map->UpdateNodeBody {:aspect-names (conj aspect-names cm/asp-dublincore)})
-         (nodes/update-node (:ticket @c/config) (:id resource)))))
+         (nodes/update-node (c/ticket) (:id resource)))))
 ```
 Note that the (resource part of) message is automatically converted to a plain Clojure map with keys changed to
 kebab-case and keywordized thus looks like this (representing a node in this case):
@@ -125,8 +125,8 @@ will look for ALF_USER and ALF_PASS environment variables if defined, otherwise 
 Environment variables will win over the configuration files.
 
 Lastly `cral.config/configure` is called and an Alfresco ticket is requested and then stored in `:alfresco :ticket`
-section of the map. It can be retrieved with `(get-in @c/config [:alfresco :ticket])` (assuming that config has been
-imported as `[weller.config :as c]`).
+section of the map. It can be retrieved with `(c/ticket)` (assuming that config has been imported as
+`[weller.config :as c]`).
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receives ActiveMQ messages. Then at least one tap must be
 connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note that
