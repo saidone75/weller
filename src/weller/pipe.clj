@@ -49,13 +49,13 @@
         :running false))))
 
 (defn make-tap
-  "Return a filtered tap connected to the `mult` channel.
+  "Returns a filtered tap connected to the `mult` channel.
   The tap is filtered by predicate `pred`."
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
 (defn add-filtered-tap
-  "Add a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
+  "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
   [this pred f]
   (if (:running this)
     (do
@@ -64,15 +64,15 @@
     (assoc this :taps (conj (:taps this) (mh/make-handler (make-tap (:mult this) pred) f)))))
 
 (defn remove-taps
-  "Stop the pipe if running and remove all taps from it."
+  "Stops the pipe if running and removes all the taps from it."
   [this]
   (if (:running this)
     (assoc (component/stop this) :taps [])
     (assoc this :taps [])))
 
 (defn make-pipe
-  "Create a pipe with a built-in ActiveMQ listener.
-  If a predicate `pred` and a function `f` are provided, then also add a filtered tap to it and start the pipe."
+  "Creates a pipe with a built-in ActiveMQ listener.
+  If a predicate `pred` and a function `f` are provided, then also adds a filtered tap to it and starts the pipe."
   ([]
    ;; load configuration
    (c/configure)
