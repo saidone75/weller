@@ -50,12 +50,12 @@
 
 (defn make-tap
   "Return a filtered tap connected to the `mult` channel.
-  The returned tap is filtered by predicate `pred`."
+  The tap is filtered by predicate `pred`."
   [mult pred]
   (a/tap mult (a/chan 1 (filter pred))))
 
 (defn add-filtered-tap
-  "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
+  "Add a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
   [this pred f]
   (if (:running this)
     (do
@@ -71,7 +71,7 @@
     (assoc this :taps [])))
 
 (defn make-pipe
-  "Creates a pipe with a built-in ActiveMQ listener.
+  "Create a pipe with a built-in ActiveMQ listener.
   If a predicate `pred` and a function `f` are provided, then also add a filtered tap to it and start the pipe."
   ([]
    ;; load configuration

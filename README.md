@@ -1,5 +1,5 @@
 # Weller
-Weller is like Alfresco out-of-process extensions but in [Clojure](https://clojure.org).
+Weller is like [Alfresco](https://docs.alfresco.com/content-services/latest/develop/oop-sdk/) out-of-process extensions but in [Clojure](https://clojure.org).
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
 [![cljdoc badge](https://cljdoc.org/badge/org.saidone/weller)](https://cljdoc.org/d/org.saidone/weller)
@@ -41,17 +41,17 @@ and this one matches updated nodes with `cm:titled` **or** `cm:dublincore` aspec
                      (pred/node-aspect? cm/asp-dublincore)))
 ```
 The built-in predicates are available [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
-### Create a function
-A (processing) function is the piece of code deputed to take the (resource part of) message and do something with it.
-The (node) resource is a map representing (usually) a node in Alfresco.
+### Create functions for message processing
+Functions are the pieces of code deputed to take the message and do something with it. The resource is a map
+representing a node in Alfresco.
 
-A simple function that prints the node name could be:
+A function that prints the node name could be as simple as:
 ```clojure
 (defn print-node-name
   [resource]
   (println (:name resource)))
 ```
-a more useful function that make use of the [CRAL](https://github.com/saidone75/cral) library to update the node on
+a more useful function that makes use of the [CRAL](https://github.com/saidone75/cral) library to update the node on
 Alfresco:
 ```clojure
 (defn add-aspect
