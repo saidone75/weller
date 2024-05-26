@@ -23,7 +23,7 @@
                  [org.apache.activemq/activemq-broker "6.1.2"]
                  [org.clojure/data.json "2.5.0"]
                  [org.saidone/cral "0.3.2"]
-                 [com.taoensso/telemere "1.0.0-beta9"]
+                 [com.taoensso/telemere "1.0.0-beta14"]
                  [org.clojure/core.async "1.6.681"]]
   :main ^:skip-aot weller.core
   :target-path "target/%s"
