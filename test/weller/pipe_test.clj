@@ -27,7 +27,7 @@
 
 (defn- get-node-name-with-cral
   [resource]
-  (get-in (nodes/get-node (:ticket @c/config) (:id resource)) [:body :entry :name]))
+  (get-in (nodes/get-node (c/ticket) (:id resource)) [:body :entry :name]))
 
 (deftest make-pipe-test
   (let [result (promise)
