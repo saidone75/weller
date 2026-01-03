@@ -19,12 +19,12 @@
   :url "https://saidone.org"
   :license {:name "GNU General Public License v3.0"
             :url  "https://www.gnu.org/licenses/gpl-3.0.txt"}
-  :dependencies [[org.clojure/clojure "1.11.3"]
-                 [org.apache.activemq/activemq-broker "6.1.2"]
-                 [org.clojure/data.json "2.5.0"]
-                 [org.saidone/cral "0.3.2"]
-                 [com.taoensso/telemere "1.0.0-beta14"]
-                 [org.clojure/core.async "1.6.681"]]
+  :dependencies [[org.clojure/clojure "1.12.4"]
+                 [org.apache.activemq/activemq-broker "6.2.0"]
+                 [org.clojure/data.json "2.5.2"]
+                 [org.saidone/cral "0.3.5"]
+                 [com.taoensso/telemere "1.2.1"]
+                 [org.clojure/core.async "1.8.741"]]
   :main ^:skip-aot weller.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot      :all
