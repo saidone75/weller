@@ -24,7 +24,7 @@ Filters can be made of a single predicate:
 ```
 or by a composition of predicates using `every-pred` (logical AND) or `some-fn` (logical OR) Clojure built-in functions.
 
-E.g. this matches every updated node which is also file:
+E.g. this matches every updated node which is also a file:
 ```clojure
 (every-pred (pred/event? events/node-updated)
             (pred/is-file?))
