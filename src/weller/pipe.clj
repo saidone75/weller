@@ -67,10 +67,17 @@
     (assoc this :taps (conj (:taps this) (mh/make-handler (make-tap (:mult this) pred) f)))))
 
 (defn remove-taps
-  "Stops the pipe if running and removes all the taps from it."
+  "Stops the pipe if running, disconnects and closes its tap channels, and removes the taps.
+  Discards queued messages on removed taps to release pending deliveries from the mult."
   [this]
-  (if (:running this)
-    (assoc (component/stop this) :taps [])
+  (let [this (if (:running this) (component/stop this) this)]
+    (doseq [{:keys [chan]} (:taps this)]
+      (a/untap (:mult this) chan)
+      ;; Closing prevents new puts; draining releases puts already pending in
+      ;; the mult's current distribution, even when the tap buffer was full.
+      (a/close! chan)
+      (loop []
+        (when (some? (a/poll! chan)) (recur))))
     (assoc this :taps [])))
 
 (defn make-pipe
