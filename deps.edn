@@ -1,10 +1,10 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.4"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.6"}
         org.clojure/data.json {:mvn/version "2.5.2"}
-        org.apache.activemq/activemq-broker {:mvn/version "6.2.0"}
+        org.apache.activemq/activemq-broker {:mvn/version "6.3.2"}
         org.saidone/cral {:mvn/version "0.3.5"}
-        org.clojure/core.async {:mvn/version "1.8.741"}
-        com.taoensso/telemere {:mvn/version "1.2.1"}}
+        org.clojure/core.async {:mvn/version "1.9.865"}
+        com.taoensso/telemere {:mvn/version "1.4.0"}}
  :aliases
  {:dev   {:extra-paths ["test"]}
   :repl  {:extra-paths ["test"]
@@ -15,5 +15,5 @@
           :main-opts   ["-m" "cognitect.test-runner"]
           :exec-fn     cognitect.test-runner.api/test}
   :build {:deps       {io.github.clojure/tools.build {:mvn/version "0.10.14"}
-                       slipset/deps-deploy {:mvn/version "0.2.5"}}
+                       slipset/deps-deploy           {:mvn/version "0.2.5"}}
           :ns-default build}}}
