@@ -36,15 +36,16 @@
       (do
         (t/log! :info (format "starting %s" component-name))
         (let [stop-chan (a/chan)
-              worker (a/go-loop []
-                       (let [[message port] (a/alts! [stop-chan chan] :priority true)]
-                         (when (and (= port chan) (some? message))
-                           (try
-                             (f (get-in message [:data :resource]))
-                             (catch Exception e
-                               (t/log! {:level :error :error e}
-                                       "Message handler callback failed; skipping message")))
-                           (recur))))]
+              worker (a/thread
+                       (loop []
+                         (let [[message port] (a/alts!! [stop-chan chan] :priority true)]
+                           (when (and (= port chan) (some? message))
+                             (try
+                               (f (get-in message [:data :resource]))
+                               (catch Exception e
+                                 (t/log! {:level :error :error e}
+                                         "Message handler callback failed; skipping message")))
+                             (recur)))))]
           (assoc this :running true :stop-chan stop-chan :worker worker)))))
 
   (stop [this]
