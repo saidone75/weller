@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Move `make-tap` from `weller.predicates` to `weller.pipe`.
 - Require pipes to be stopped before adding filtered taps.
+- Run JMS reception and message callbacks on blocking workers separate from the core.async
+  `go` dispatch pool, preserving sequential processing within each handler.
 - Replace Leiningen with Clojure CLI and tools.build, including CI and cljdoc preview scripts.
 - Update Clojure to 1.12.6, ActiveMQ to 6.3.2, data.json to 2.5.2, CRAL to 0.3.5,
   core.async to 1.9.865, and Telemere to 1.4.0.
@@ -27,6 +29,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and PostgreSQL 18, and increase Solr memory.
 - Standardize GPL license headers with SPDX identifiers and copyright years.
 - Expand configuration, development, build, and publishing documentation.
+
+### Fixed
+
+- Wake and stop waiting message handlers through a dedicated stop channel, allowing
+  restarts without leaving previous consumers active.
+- Log and discard malformed JSON, non-object JSON values, and unsupported JMS message
+  types without stopping the listener.
+- Keep handlers processing subsequent messages after callback exceptions, without
+  automatically retrying failed callbacks.
+- Disconnect, close, and drain removed tap channels to release pending `mult`
+  deliveries and prevent message distribution from stalling.
 
 ### Removed
 
