@@ -28,6 +28,19 @@
 
 (def ^:const component-name "ActiveMQ listener")
 
+(defn- parse-message [message]
+  (try
+    (when-not (instance? TextMessage message)
+      (throw (ex-info "Expected a JMS TextMessage" {})))
+    (let [event (json/read-str (.getText ^TextMessage message))]
+      (when-not (map? event)
+        (throw (ex-info "Expected a JSON object" {})))
+      (cu/kebab-keywordize-keys event))
+    (catch Exception e
+      (t/log! {:level :error :error e}
+              "Invalid JMS message; skipping message")
+      nil)))
+
 (defrecord ActiveMqListener
   [config connection chan]
   component/Component
@@ -45,13 +58,21 @@
             topic (.createTopic session (:topic config))
             consumer (.createConsumer session topic)]
         (.start connection)
-        (a/go-loop [^TextMessage message nil]
-          (when-not (nil? message)
-            (let [message (cu/kebab-keywordize-keys (json/read-str (.getText message)))]
-              (t/trace! message)
-              (a/>! chan message)))
-          (when (.isStarted connection) (recur (.receive consumer))))
-        (assoc this :connection connection))))
+        (let [stop-chan (a/chan)
+              worker (a/thread
+                       (try
+                         (loop []
+                           (when-let [message (.receive consumer)]
+                             (if-let [event (parse-message message)]
+                               (do
+                                 (t/trace! event)
+                                 (let [[sent? port] (a/alts!! [stop-chan [chan event]] :priority true)]
+                                   (when (and (= port chan) sent?) (recur))))
+                               (when (.isStarted connection) (recur)))))
+                         (catch Exception e
+                           (when (.isStarted connection)
+                             (t/log! {:level :error :error e} "JMS receive failed")))))]
+          (assoc this :connection connection :stop-chan stop-chan :worker worker)))))
 
   (stop [this]
     (t/log! :info (format "stopping %s" component-name))
@@ -60,6 +81,7 @@
         (t/log! :warn (format "%s is not running" component-name))
         this)
       (do
+        (a/close! (:stop-chan this))
         (try
           (.close connection)
           (catch Throwable _

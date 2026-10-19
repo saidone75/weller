@@ -147,6 +147,17 @@ pipe started automatically:
 (pipe/make-pipe (pred/event? events/node-created) process-created-node)
 ```
 
+Malformed JSON, JSON values other than objects, and JMS messages other than
+`TextMessage` are logged and discarded. If a processing function throws an
+exception, the handler logs the error and continues with the next message.
+Failed messages are not retried automatically; callbacks may have already
+performed side effects before failing. JMS uses `AUTO_ACKNOWLEDGE`, so callback
+failure does not trigger broker redelivery.
+
+JMS reception and each message handler run on blocking workers, separate from
+the core.async `go` dispatch pool. Each handler processes messages sequentially.
+Stopping a handler lets its current callback finish before the worker exits.
+
 ## Development and build
 Requires Java 21 and the Clojure CLI. Dependencies are declared in `deps.edn`;
 artifact coordinates and version are defined in `build.clj`.
