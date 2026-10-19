@@ -1,5 +1,5 @@
 ;
-; Weller is like Alfresco out-of-process extensions but in Clojure
+; Weller - At your service. Out of process.
 ; Copyright (C) 2023-2026 Saidone
 ; SPDX-License-Identifier: GPL-3.0-or-later
 ;
