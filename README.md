@@ -171,8 +171,9 @@ The standalone JAR preserves the previous uberjar packaging. `weller.core`
 currently has no `-main` function; start message pipes from the REPL or from your
 own application entry point.
 
-To publish to Clojars, set `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` (a deploy token),
-then run `clojure -T:build deploy`.
+To publish to Clojars, run `./deploy.sh` and enter your username and deploy token
+(hidden while typing). Alternatively, set `CLOJARS_USERNAME` and `CLOJARS_PASSWORD`
+(a deploy token), then run `clojure -T:build deploy`.
 For a local documentation preview, run `./cljdoc-preview.sh` (Docker required)
 and open http://localhost:9000.
 
