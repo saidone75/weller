@@ -41,6 +41,7 @@ and this one matches updated nodes with `cm:titled` **or** `cm:dublincore` aspec
                      (pred/node-aspect? cm/asp-dublincore)))
 ```
 The built-in predicates are available [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
+
 ### Create functions for message processing
 Functions are the pieces of code deputed to take the message and do something with it. The resource is a map
 representing a node in Alfresco.
@@ -91,6 +92,7 @@ kebab-case and keywordized thus looks like this (representing a node in this cas
  :@type "NodeResource",
  :created-at "2024-05-17T12:25:06.567Z"}
 ```
+
 ### Configuration
 Configuration is stored internally in the atom `weller.config/config`. It contains a map like this:
 ```clojure
@@ -127,6 +129,7 @@ Environment variables will win over the configuration files.
 Lastly `cral.config/configure` is called and an Alfresco ticket is requested and then stored in `:alfresco :ticket`
 section of the map. It can be retrieved with `(c/ticket)` (assuming that config has been imported as
 `[weller.config :as c]`).
+
 ### Build and start a message pipe
 The standard constructor `make-pipe` will create a pipe that receives ActiveMQ messages. Then at least one tap must be
 connected using the function `add-filtered-tap` that takes a filter and a (processing) function as arguments (note that
@@ -143,6 +146,7 @@ pipe started automatically:
 ```clojure
 (pipe/make-pipe (pred/event? events/node-created) process-created-node)
 ```
+
 ## Development and build
 Requires Java 21 and the Clojure CLI. Dependencies are declared in `deps.edn`;
 artifact coordinates and version are defined in `build.clj`.
@@ -173,6 +177,6 @@ For a local documentation preview, run `./cljdoc-preview.sh` (Docker required)
 and open http://localhost:9000.
 
 ## License
-Copyright (c) 2024 Saidone
+Copyright (c) 2023-2026 Saidone
 
 Distributed under the GNU General Public License v3.0
