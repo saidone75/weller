@@ -28,6 +28,19 @@
 
 (def ^:const component-name "ActiveMQ listener")
 
+(defn- parse-message [message]
+  (try
+    (when-not (instance? TextMessage message)
+      (throw (ex-info "Expected a JMS TextMessage" {})))
+    (let [event (json/read-str (.getText ^TextMessage message))]
+      (when-not (map? event)
+        (throw (ex-info "Expected a JSON object" {})))
+      (cu/kebab-keywordize-keys event))
+    (catch Exception e
+      (t/log! {:level :error :error e}
+              "Invalid JMS message; skipping message")
+      nil)))
+
 (defrecord ActiveMqListener
   [config connection chan]
   component/Component
@@ -45,9 +58,9 @@
             topic (.createTopic session (:topic config))
             consumer (.createConsumer session topic)]
         (.start connection)
-        (a/go-loop [^TextMessage message nil]
+        (a/go-loop [message nil]
           (when-not (nil? message)
-            (let [message (cu/kebab-keywordize-keys (json/read-str (.getText message)))]
+            (when-let [message (parse-message message)]
               (t/trace! message)
               (a/>! chan message)))
           (when (.isStarted connection) (recur (.receive consumer))))
