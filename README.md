@@ -143,6 +143,35 @@ pipe started automatically:
 ```clojure
 (pipe/make-pipe (pred/event? events/node-created) process-created-node)
 ```
+## Development and build
+Requires Java 21 and the Clojure CLI. Dependencies are declared in `deps.edn`;
+artifact coordinates and version are defined in `build.clj`.
+
+```bash
+clojure -M:repl          # REPL in weller.core, including test namespaces
+clojure -M:dev           # REPL with source and test paths
+clojure -M:test          # integration tests (Alfresco and ActiveMQ required)
+clojure -T:build jar     # library source JAR and Maven POM
+clojure -T:build uber    # AOT-compiled standalone JAR
+clojure -T:build install # build and install into the local Maven repository
+clojure -T:build clean   # remove target/
+clojure -T:build info    # print artifact coordinates and version
+```
+
+The integration tests use the Alfresco and ActiveMQ services started with
+`./alfresco.sh start` (or `alfresco.bat start` on Windows), configured through `weller.edn`.
+They create, update and delete test content. CI builds the library and compiles
+all source namespaces without requiring those services.
+
+The standalone JAR preserves the previous uberjar packaging. `weller.core`
+currently has no `-main` function; start message pipes from the REPL or from your
+own application entry point.
+
+To publish to Clojars, set `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` (a deploy token),
+then run `clojure -T:build deploy`.
+For a local documentation preview, run `./cljdoc-preview.sh` (Docker required)
+and open http://localhost:9000.
+
 ## License
 Copyright (c) 2024 Saidone
 
