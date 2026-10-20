@@ -1,4 +1,4 @@
-# Weller - At your service. Out of process.
+# Weller - Here's your servant, Sir. Out o' the process.
 Weller is like [Alfresco](https://github.com/Alfresco/alfresco-java-sdk) out-of-process extensions but in [Clojure](https://clojure.org).
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
