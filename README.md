@@ -1,4 +1,7 @@
-# Weller - Here's your servant, Sir. Out o' the process.
+# Weller
+
+> Here's your servant, Sir. Out o' the process.
+
 Weller is like [Alfresco](https://github.com/Alfresco/alfresco-java-sdk) out-of-process extensions but in [Clojure](https://clojure.org).
 
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
@@ -141,6 +144,11 @@ started manually by calling `component/start` on it.
     (pipe/add-filtered-tap (pred/event? events/node-deleted) process-deleted-node)
     (component/start))
 ```
+
+You can also call `add-filtered-tap` on a running pipe: the new handler starts
+immediately. Keep the returned pipe value so subsequent stop and removal
+operations include the new tap.
+
 The *quick* constructor takes directly a filter and a function. A tap will be created and connected internally and the
 pipe started automatically:
 ```clojure
@@ -159,7 +167,7 @@ the core.async `go` dispatch pool. Each handler processes messages sequentially.
 Stopping a handler lets its current callback finish before the worker exits.
 
 ## Development and build
-Requires Java 21 and the Clojure CLI. Dependencies are declared in `deps.edn`;
+Requires Java 25 and the Clojure CLI. Dependencies are declared in `deps.edn`;
 artifact coordinates and version are defined in `build.clj`.
 
 ```bash

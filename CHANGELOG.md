@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
+Requires Java 25 and the Clojure CLI.
+
 ### Added
 
 - Layered `weller.edn` configuration files with deep merging and environment variable placeholders.
@@ -18,8 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use Java 25 for development, builds, and CI.
 - Move `make-tap` from `weller.predicates` to `weller.pipe`.
-- Require pipes to be stopped before adding filtered taps.
+- Allow filtered taps to be added to running pipes, starting their handlers immediately.
 - Run JMS reception and message callbacks on blocking workers separate from the core.async
   `go` dispatch pool, preserving sequential processing within each handler.
 - Replace Leiningen with Clojure CLI and tools.build, including CI and cljdoc preview scripts.
@@ -61,5 +66,6 @@ on 2024-05-20. Both the published POM's SCM tag and the JAR's `pom.properties`
 identify commit [`7cc85880b396c334526afe769a2b516d2d82759b`](https://github.com/saidone75/weller/commit/7cc85880b396c334526afe769a2b516d2d82759b).
 The GitHub tag and release were added retrospectively for that exact commit.
 
-[Unreleased]: https://github.com/saidone75/weller/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/saidone75/weller/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/saidone75/weller/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/saidone75/weller/releases/tag/v0.1.0
