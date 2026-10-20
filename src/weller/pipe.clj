@@ -1,5 +1,5 @@
 ;
-; Weller - At your service. Out of process.
+; Weller - Here's your servant, Sir. Out o' the process.
 ; Copyright (C) 2023-2026 Saidone
 ; SPDX-License-Identifier: GPL-3.0-or-later
 ;
@@ -58,13 +58,14 @@
   (a/tap mult (a/chan 1 (filter pred))))
 
 (defn add-filtered-tap
-  "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`."
+  "Adds a filtered (by `pred`) tap to the pipe. Filtered messages are processed by function `f`.
+  Starts the new handler immediately if the pipe is running. Use the returned pipe for subsequent lifecycle operations."
   [this pred f]
-  (if (:running this)
-    (do
-      (t/log! :warn (format "please stop %s before adding taps" component-name))
-      this)
-    (assoc this :taps (conj (:taps this) (mh/make-handler (make-tap (:mult this) pred) f)))))
+  (let [chan (a/chan 1 (filter pred))
+        handler (mh/make-handler chan f)
+        handler (if (:running this) (component/start handler) handler)]
+    (a/tap (:mult this) chan)
+    (assoc this :taps (conj (:taps this) handler))))
 
 (defn remove-taps
   "Stops the pipe if running, disconnects and closes its tap channels, and removes the taps.

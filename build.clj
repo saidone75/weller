@@ -1,5 +1,5 @@
 ;
-; Weller - At your service. Out of process.
+; Weller - Here's your servant, Sir. Out o' the process.
 ; Copyright (C) 2023-2026 Saidone
 ; SPDX-License-Identifier: GPL-3.0-or-later
 ;
@@ -21,7 +21,7 @@
   (:require [clojure.tools.build.api :as b]))
 
 (def lib 'org.saidone/weller)
-(def version "0.1.1-SNAPSHOT")
+(def version "0.2.0")
 (def class-dir "target/classes")
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
 (def pom-file (format "%s/META-INF/maven/%s/%s/pom.xml" class-dir (namespace lib) (name lib)))

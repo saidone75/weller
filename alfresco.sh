@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# Weller - At your service. Out of process.
+# Weller - Here's your servant, Sir. Out o' the process.
 # Copyright (C) 2023-2026 Saidone
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
