@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2026-10-20
 
-Requires Java 25 and the Clojure CLI.
-
 ### Added
 
 - Layered `weller.edn` configuration files with deep merging and environment variable placeholders.
