@@ -4,18 +4,37 @@
 
 Weller is like [Alfresco](https://github.com/Alfresco/alfresco-java-sdk) out-of-process extensions but in [Clojure](https://clojure.org).
 
+<img src="https://victorianweb.org/art/illustration/kyd/59.jpg" width="512">
+
 [![Clojars Version](https://img.shields.io/clojars/v/org.saidone/weller)](https://clojars.org/org.saidone/weller)
 [![cljdoc badge](https://cljdoc.org/badge/org.saidone/weller)](https://cljdoc.org/d/org.saidone/weller)
 
-<img src="https://victorianweb.org/art/illustration/kyd/59.jpg" width="512">
-
 ## Outline
+
+- 100% Clojure
 - Lean and readable code
-- 100% pure Clojure
-- 100% test coverage
 - Benefits from programming at the [REPL](https://clojure.org/guides/repl/introduction)
+- ActiveMQ event consumption with core.async message pipes and multiple processing taps
+- Composable predicates for events, node types, aspects, properties, content and associations
+- Node path filtering by exact string or regular expression
+- Start and stop pipes, add taps while running, and remove taps when needed
+- Layered EDN configuration with environment variable placeholders
+- Alfresco REST API integration through [CRAL](https://github.com/saidone75/cral), with automatic ticket validation and renewal
 
 ## Usage
+
+The examples below use these namespace aliases:
+```clojure
+(require '[cral.api.core.nodes :as nodes]
+         '[cral.model.alfresco.cm :as cm]
+         '[cral.model.core :as model]
+         '[weller.components.component :as component]
+         '[weller.config :as c]
+         '[weller.events :as events]
+         '[weller.pipe :as pipe]
+         '[weller.predicates :as pred])
+```
+
 ### Create filters by composing predicates
 Filters are used for selecting messages that will flow through a tap. Filters can discriminate a message by matching
 several conditions (e.g. a node that has been created or deleted, an aspect that has been added to a node, a property
@@ -43,7 +62,9 @@ and this one matches updated nodes with `cm:titled` **or** `cm:dublincore` aspec
             (some-fn (pred/node-aspect? cm/asp-titled)
                      (pred/node-aspect? cm/asp-dublincore)))
 ```
-The built-in predicates are available [here](src/weller/predicates.clj) while the events [here](src/weller/events.clj).
+The built-in predicates are available in [weller.predicates](src/weller/predicates.clj),
+with REST-backed node path filtering in [weller.predicates-extra](src/weller/predicates_extra.clj).
+Event constants are defined in [weller.events](src/weller/events.clj).
 
 ### Create functions for message processing
 Functions are the pieces of code deputed to take the message and do something with it. The resource is a map
@@ -113,21 +134,23 @@ Configuration is stored internally in the atom `weller.config/config`. It contai
             :port   61616
             :topic  "alfresco.repo.event2"}}
 ```
-When a message pipe is started then `weller.config/configure` is called and will try to load these files (in order):
+When `make-pipe` creates a message pipe, `weller.config/configure` is called and tries to load these files (in order):
 ```clojure
-(def ^:private cfg-files
+(def ^:const cfg-files
   ["resources/weller.edn"
    "~/.weller/weller.edn"
    "./weller.edn"])
 ```
-each (map contained in) file is (deep) merged with the previous, and values being overwritten by the most recent.
+Each available file is deep-merged into the current configuration, with later files overriding earlier values.
+These are filesystem paths relative to the working directory, except for the home-directory path.
+Missing or unreadable files are logged and skipped.
 Placeholders for environment variables can be used, e.g.:
 ```clojure
 {:alfresco {:user     "${ALF_USER:admin}"
             :password "${ALF_PASS:admin}"}}
 ```
-will look for ALF_USER and ALF_PASS environment variables if defined, otherwise the default value will be used.
-Environment variables will win over the configuration files.
+will look for `ALF_USER` and `ALF_PASS` environment variables if defined; otherwise the placeholder defaults are used.
+Environment variables are only read through placeholders. A literal value in a later file can override an earlier resolved placeholder.
 
 Lastly `cral.config/configure` is called and an Alfresco ticket is requested and then stored in `:alfresco :ticket`
 section of the map. It can be retrieved with `(c/ticket)` (assuming that config has been imported as
@@ -186,7 +209,7 @@ The integration tests use the Alfresco and ActiveMQ services started with
 They create, update and delete test content. CI builds the library and compiles
 all source namespaces without requiring those services.
 
-The standalone JAR preserves the previous uberjar packaging. `weller.core`
+The standalone JAR bundles the application and its dependencies. `weller.core`
 currently has no `-main` function; start message pipes from the REPL or from your
 own application entry point.
 
@@ -199,4 +222,4 @@ and open http://localhost:9000.
 ## License
 Copyright (c) 2023-2026 Saidone
 
-Distributed under the GNU General Public License v3.0
+Distributed under the [GNU General Public License v3.0 or later](LICENSE).
